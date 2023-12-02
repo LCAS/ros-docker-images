@@ -15,19 +15,10 @@ jobs:
     runs-on: lcas
     strategy:
         matrix:
-          ros_distribution:
+          tag:
             # - noetic
-            - humble-ros-base
-            - iron-ros-base
-          include:
-            - tag: humble-ros-base
-              src_docker_image: ros:humble-ros-base-jammy
-              ros_distribution: humble
-              ros_version: 2
-            - tag: iron-ros-base
-              src_docker_image: ros:iron-ros-base-jammy
-              ros_distribution: iron
-              ros_version: 2
+            - humble-ros-base-jammy
+            - iron-ros-base-jammy
   
     steps:
     - uses: actions/checkout@v3
@@ -66,5 +57,5 @@ jobs:
         push: ${{ github.event_name != 'pull_request' }}
         tags: lcas.lincoln.ac.uk/lcas/ros:${{ matrix.tag }}
         build-args: |
-            BASE_IMAGE=${{ matrix.src_docker_image }}
+            BASE_IMAGE=ros/${{ matrix.tag }}
             BRANCH=${{ env.BRANCH }}
