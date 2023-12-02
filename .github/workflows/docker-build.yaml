@@ -19,8 +19,9 @@ jobs:
         matrix:
           tag:
             # - noetic
-            - humble-ros-base-jammy
-            - iron-ros-base-jammy
+            - humble
+            - iron
+            - rolling
   
     steps:
     - uses: actions/checkout@v3
