@@ -51,6 +51,6 @@ jobs:
         push: ${{ github.event_name != 'pull_request' }}
         tags: ${{ matrix.push_tag }}
         build-args: |
-            BASE_IMAGE=ros:${{ matrix.base_image }}
+            BASE_IMAGE=${{ matrix.base_image }}
             BRANCH=${{ env.BRANCH }}
             ROS_DISTRO=${{ matrix.ros_distro }}
