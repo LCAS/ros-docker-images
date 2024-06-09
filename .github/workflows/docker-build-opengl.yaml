@@ -1,4 +1,4 @@
-name: Build Docker Images
+name: Build OpenGL-supported Docker Images
 
 on:
   push:
