@@ -201,6 +201,7 @@ COPY start-turbovnc.sh /opt/entrypoint.d/90-turbovnc.sh
 RUN echo "source /opt/ros/${ROS_DISTRO}/setup.bash" > /opt/entrypoint.d/91-ros.sh
 
 ENTRYPOINT ["/opt/entrypoint.sh"]
+EXPOSE 5801
 
 ###########################################
 FROM openglvnc as user
