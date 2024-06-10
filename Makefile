@@ -16,8 +16,6 @@ ubuntu:
 	docker build -t $(UBUNTU_DEST_TAG) --build-arg BASE_IMAGE=$(UBUNTU_BASE_IMAGE) --build-arg ROS_DISTRO=$(ROS_DISTRO) -f Dockerfile.opengl .
 
 build: nvidia ubuntu
-	@echo "Building the project..."
-	docker build 
 
 run_nvidia: nvidia
 	@echo "Running the project..."
