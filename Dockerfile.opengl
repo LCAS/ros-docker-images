@@ -165,7 +165,7 @@ RUN curl -L -O https://github.com/TurboVNC/turbovnc/releases/download/3.1.1/turb
     apt-get -y install ./turbovnc_3.1.1_amd64.deb && \
     rm turbovnc_3.1.1_amd64.deb
 RUN addgroup --gid 1002 vglusers && adduser ros video && adduser ros vglusers
-RUN apt-get update && apt-get -y install blackbox python3-minimal python3-pip python3-numpy unzip less tmux screen
+RUN apt-get update && apt-get -y install xfce4-session xfce4-panel xfce4-terminal thunar xterm x11-utils python3-minimal python3-pip python3-numpy unzip less tmux screen
 ENV DEBIAN_FRONTEND=
 
 # Install noVNC
@@ -206,6 +206,7 @@ EXPOSE 5801
 ###########################################
 FROM openglvnc as user
 USER ros
+WORKDIR ${HOME}
 
 RUN mkdir -p ~/.config/rosdistro && echo "index_url: https://raw.github.com/LCAS/rosdistro/master/index-v4.yaml" > ~/.config/rosdistro/config.yaml
 RUN sudo apt-get purge -y xfce4-screensaver
