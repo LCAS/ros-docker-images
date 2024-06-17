@@ -14,7 +14,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: lcas
     strategy:
         matrix:
           include:
@@ -23,9 +23,16 @@ jobs:
               push_tag: lcas.lincoln.ac.uk/lcas/ros:jammy-humble
             - base_image: nvidia/cuda:11.8.0-runtime-ubuntu22.04
               ros_distro: humble
-              push_tag: lcas.lincoln.ac.uk/lcas/ros:jammy-humble-cuda-opengl
+              push_tag: lcas.lincoln.ac.uk/lcas/ros:jammy-humble-cuda11.8-opengl
+            - base_image: nvidia/cuda:12.2.2-cudnn8-devel-ubuntu22.04
+              ros_distro: humble
+              push_tag: lcas.lincoln.ac.uk/lcas/ros:jammy-humble-cuda12.2-opengl
   
     steps:
+    - name: Node Js
+      uses: actions/setup-node@v4
+      with:
+        node-version: "^16.13.0 || >=18.0.0"
     - uses: actions/checkout@v3
     - name: What
       run: echo "BRANCH=${GITHUB_REF##*/}" >> $GITHUB_ENV
