@@ -78,14 +78,14 @@ The matrix includes the following configurations:
   - `push_tag`: `lcas.lincoln.ac.uk/lcas/ros:jammy-humble`
 - **NVIDIA Base Images**:
   - `base_image`: `nvidia/cuda:11.8.0-cudnn8-devel-ubuntu22.04`
-  - `ros_distro`: `humble`
-  - `push_tag`: `lcas.lincoln.ac.uk/lcas/ros:jammy-humble-cuda11.8-opengl`
+     - `ros_distro`: `humble`
+     - `push_tag`: `lcas.lincoln.ac.uk/lcas/ros:jammy-humble-cuda11.8-opengl`
   - `base_image`: `nvidia/cuda:12.1.1-cudnn8-devel-ubuntu22.04`
-  - `ros_distro`: `humble`
-  - `push_tag`: `lcas.lincoln.ac.uk/lcas/ros:jammy-humble-cuda12.1-opengl`
+     - `ros_distro`: `humble`
+     - `push_tag`: `lcas.lincoln.ac.uk/lcas/ros:jammy-humble-cuda12.1-opengl`
   - `base_image`: `nvidia/cuda:12.2.2-cudnn8-devel-ubuntu22.04`
-  - `ros_distro`: `humble`
-  - `push_tag`: `lcas.lincoln.ac.uk/lcas/ros:jammy-humble-cuda12.2-opengl`
+     - `ros_distro`: `humble`
+     - `push_tag`: `lcas.lincoln.ac.uk/lcas/ros:jammy-humble-cuda12.2-opengl`
 
 ###### Steps
 
