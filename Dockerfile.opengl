@@ -60,7 +60,9 @@ RUN apt-get update \
 
 # Env vars for the nvidia-container-runtime.
 ENV NVIDIA_VISIBLE_DEVICES all
-ENV NVIDIA_DRIVER_CAPABILITIES graphics,utility,compute
+# enable all capabilities for the container
+# Explained here: https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/1.10.0/user-guide.html#driver-capabilities
+ENV NVIDIA_DRIVER_CAPABILITIES=all
 ENV QT_X11_NO_MITSHM 1
 
 ENV AMENT_PREFIX_PATH=/opt/ros/${ROS_DISTRO}
