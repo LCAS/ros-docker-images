@@ -19,9 +19,9 @@ build: nvidia ubuntu
 
 run_nvidia: nvidia
 	@echo "Running the project..."
-	-docker run --rm --gpus all -p 5801:5801 -it $(NVIDIA_DEST_TAG) /bin/bash
+	-docker run --rm --gpus all -p 5801 -it $(NVIDIA_DEST_TAG) /bin/bash
 
 run_ubuntu: ubuntu
 	@echo "Running the project..."
-	-docker run --rm -p 5801:5801 -it $(UBUNTU_DEST_TAG) /bin/bash
+	-docker run --rm -p 5801 -it $(UBUNTU_DEST_TAG) /bin/bash
 
