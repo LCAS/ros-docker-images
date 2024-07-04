@@ -1,6 +1,7 @@
 #!/bin/bash
 echo "starting turbovnc"
-screen -dmS turbovnc bash -c 'VGL_DISPLAY=egl VGL_FPS=30 /opt/TurboVNC/bin/vncserver -depth 24 -noxstartup -securitytypes TLSNone,X509None,None 2>&1 | tee /tmp/vnc.log; read -p "Press any key to continue..."'
+sudo rm -rf /tmp/.X1-lock /tmp/.X11-unix/X1
+screen -dmS turbovnc bash -c 'VGL_DISPLAY=egl VGL_FPS=30 /opt/TurboVNC/bin/vncserver :1 -depth 24 -noxstartup -securitytypes TLSNone,X509None,None 2>&1 | tee /tmp/vnc.log; read -p "Press any key to continue..."'
 # wait for VNC to be running
 while ! xdpyinfo -display :1 > /dev/null; do
     sleep 1
