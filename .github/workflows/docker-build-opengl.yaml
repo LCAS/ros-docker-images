@@ -61,6 +61,9 @@ jobs:
       id: meta
       uses: docker/metadata-action@v5
       with:
+        labels: |
+          org.opencontainers.image.description=L-CAS ROS2 Docker Image with virtual X11 embedded (flavour: ${{ matrix.push_tag }})
+          org.opencontainers.image.authors=L-CAS Team
         # list of Docker images to use as base name for tags
         images: |
           lcas.lincoln.ac.uk/lcas/ros
@@ -136,6 +139,9 @@ jobs:
       id: meta
       uses: docker/metadata-action@v5
       with:
+        labels: |
+          org.opencontainers.image.description=L-CAS ROS2 Docker Image with virtual X11 embedded (flavour: ${{ matrix.push_tag }})
+          org.opencontainers.image.authors=L-CAS Team
         # list of Docker images to use as base name for tags
         images: |
           lcas.lincoln.ac.uk/lcas/ros
