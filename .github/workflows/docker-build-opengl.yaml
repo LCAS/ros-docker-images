@@ -22,19 +22,19 @@ jobs:
           include:
             - base_image: ubuntu:jammy
               ros_distro: humble
-              push_tag: lcas.lincoln.ac.uk/lcas/ros:jammy-humble
+              push_tag: jammy-humble
             - base_image: nvidia/cuda:11.8.0-cudnn8-devel-ubuntu22.04
               ros_distro: humble
-              push_tag: lcas.lincoln.ac.uk/lcas/ros:jammy-humble-cuda11.8-opengl
+              push_tag: jammy-humble-cuda11.8-opengl
             - base_image: nvidia/cuda:12.1.1-cudnn8-devel-ubuntu22.04
               ros_distro: humble
-              push_tag: lcas.lincoln.ac.uk/lcas/ros:jammy-humble-cuda12.1-opengl
+              push_tag: jammy-humble-cuda12.1-opengl
             - base_image: nvidia/cuda:12.2.2-cudnn8-devel-ubuntu22.04
               ros_distro: humble
-              push_tag: lcas.lincoln.ac.uk/lcas/ros:jammy-humble-cuda12.2-opengl
+              push_tag: jammy-humble-cuda12.2-opengl
             - base_image: nvidia/cuda:12.6.2-cudnn-devel-ubuntu22.04
               ros_distro: humble
-              push_tag: lcas.lincoln.ac.uk/lcas/ros:jammy-humble-cuda12.6-opengl
+              push_tag: jammy-humble-cuda12.6-opengl
   
     steps:
     - name: Node Js
@@ -57,14 +57,32 @@ jobs:
         # Password or personal access token used to log against the Docker registry
         password: ${{ secrets.LCAS_REGISTRY_TOKEN }}
 
+    - name: Docker meta
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        # list of Docker images to use as base name for tags
+        images: |
+          lcas.lincoln.ac.uk/lcas/ros
+        # generate Docker tags based on the following events/attributes
+        tags: |
+          type=raw,event=branch,value=${{ matrix.push_tag }}
+          type=raw,event=branch,value=${{ matrix.push_tag }}-amd64
+          type=ref,event=branch,prefix=${{ matrix.push_tag }}-
+          type=ref,event=pr,prefix=${{ matrix.push_tag }}-pr-
+          type=semver,pattern={{version}},prefix=${{ matrix.push_tag }}-
+          type=semver,pattern={{major}}.{{minor}},prefix=${{ matrix.push_tag }}-
+          type=semver,pattern={{major}},prefix=${{ matrix.push_tag }}-
+
     - name: Build Docker Image
-      uses: docker/build-push-action@v5
+      uses: docker/build-push-action@v6
       with:
         context: .
         file: ./Dockerfile.opengl
         platforms: linux/amd64
         push: ${{ github.event_name != 'pull_request' }}
-        tags: ${{ matrix.push_tag }}
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
         build-args: |
             BASE_IMAGE=${{ matrix.base_image }}
             BRANCH=${{ env.BRANCH }}
@@ -79,17 +97,20 @@ jobs:
           include:
             - base_image: ubuntu:jammy
               ros_distro: humble
-              push_tag: lcas.lincoln.ac.uk/lcas/ros:jammy-humble-arm
+              push_tag: jammy-humble-arm64
             - base_image: nvidia/cuda:11.8.0-cudnn8-devel-ubuntu22.04
               ros_distro: humble
-              push_tag: lcas.lincoln.ac.uk/lcas/ros:jammy-humble-cuda11.8-opengl-arm
+              push_tag: jammy-humble-cuda11.8-opengl-arm64
             - base_image: nvidia/cuda:12.1.1-cudnn8-devel-ubuntu22.04
               ros_distro: humble
-              push_tag: lcas.lincoln.ac.uk/lcas/ros:jammy-humble-cuda12.1-opengl-arm
+              push_tag: jammy-humble-cuda12.1-opengl-arm64
             - base_image: nvidia/cuda:12.2.2-cudnn8-devel-ubuntu22.04
               ros_distro: humble
-              push_tag: lcas.lincoln.ac.uk/lcas/ros:jammy-humble-cuda12.2-opengl-arm
-  
+              push_tag: jammy-humble-cuda12.2-opengl-arm64
+            - base_image: nvidia/cuda:12.6.2-cudnn-devel-ubuntu22.04
+              ros_distro: humble
+              push_tag: jammy-humble-cuda12.6-opengl-arm64
+
     steps:
     - name: Node Js
       uses: actions/setup-node@v4
@@ -111,14 +132,31 @@ jobs:
         # Password or personal access token used to log against the Docker registry
         password: ${{ secrets.LCAS_REGISTRY_TOKEN }}
 
+    - name: Docker meta
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        # list of Docker images to use as base name for tags
+        images: |
+          lcas.lincoln.ac.uk/lcas/ros
+        # generate Docker tags based on the following events/attributes
+        tags: |
+          type=raw,event=branch,value=${{ matrix.push_tag }}
+          type=ref,event=branch,prefix=${{ matrix.push_tag }}-
+          type=ref,event=pr,prefix=${{ matrix.push_tag }}-pr-
+          type=semver,pattern={{version}},prefix=${{ matrix.push_tag }}-
+          type=semver,pattern={{major}}.{{minor}},prefix=${{ matrix.push_tag }}-
+          type=semver,pattern={{major}},prefix=${{ matrix.push_tag }}-
+
     - name: Build Docker Image
-      uses: docker/build-push-action@v5
+      uses: docker/build-push-action@v6
       with:
         context: .
         file: ./Dockerfile.opengl
         platforms: linux/arm64
         push: ${{ github.event_name != 'pull_request' }}
-        tags: ${{ matrix.push_tag }}
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
         build-args: |
             BASE_IMAGE=${{ matrix.base_image }}
             BRANCH=${{ env.BRANCH }}
