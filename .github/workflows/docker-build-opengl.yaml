@@ -61,6 +61,8 @@ jobs:
       id: meta
       uses: docker/metadata-action@v5
       with:
+        flavor: |
+          latest=false
         labels: |
           org.opencontainers.image.description=L-CAS ROS2 Docker Image with virtual X11 embedded (flavour: ${{ matrix.push_tag }})
           org.opencontainers.image.authors=L-CAS Team
@@ -139,6 +141,8 @@ jobs:
       id: meta
       uses: docker/metadata-action@v5
       with:
+        flavor: |
+          latest=false
         labels: |
           org.opencontainers.image.description=L-CAS ROS2 Docker Image with virtual X11 embedded (flavour: ${{ matrix.push_tag }})
           org.opencontainers.image.authors=L-CAS Team
