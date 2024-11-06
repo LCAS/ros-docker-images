@@ -13,26 +13,28 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
-    runs-on: lcas
+  build-amd64:
+    runs-on: 
+      - lcas
+      - cuda
     strategy:
         matrix:
           include:
             - base_image: ubuntu:jammy
               ros_distro: humble
-              push_tag: lcas.lincoln.ac.uk/lcas/ros:jammy-humble
+              push_tag: jammy-humble
             - base_image: nvidia/cuda:11.8.0-cudnn8-devel-ubuntu22.04
               ros_distro: humble
-              push_tag: lcas.lincoln.ac.uk/lcas/ros:jammy-humble-cuda11.8-opengl
+              push_tag: jammy-humble-cuda11.8-opengl
             - base_image: nvidia/cuda:12.1.1-cudnn8-devel-ubuntu22.04
               ros_distro: humble
-              push_tag: lcas.lincoln.ac.uk/lcas/ros:jammy-humble-cuda12.1-opengl
+              push_tag: jammy-humble-cuda12.1-opengl
             - base_image: nvidia/cuda:12.2.2-cudnn8-devel-ubuntu22.04
               ros_distro: humble
-              push_tag: lcas.lincoln.ac.uk/lcas/ros:jammy-humble-cuda12.2-opengl
+              push_tag: jammy-humble-cuda12.2-opengl
             - base_image: nvidia/cuda:12.6.2-cudnn-devel-ubuntu22.04
               ros_distro: humble
-              push_tag: lcas.lincoln.ac.uk/lcas/ros:jammy-humble-cuda12.6-opengl
+              push_tag: jammy-humble-cuda12.6-opengl
   
     steps:
     - name: Node Js
@@ -55,14 +57,112 @@ jobs:
         # Password or personal access token used to log against the Docker registry
         password: ${{ secrets.LCAS_REGISTRY_TOKEN }}
 
+    - name: Docker meta
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        labels: |
+          org.opencontainers.image.description=L-CAS ROS2 Docker Image with virtual X11 embedded (flavour: ${{ matrix.push_tag }})
+          org.opencontainers.image.authors=L-CAS Team
+        # list of Docker images to use as base name for tags
+        images: |
+          lcas.lincoln.ac.uk/lcas/ros
+        # generate Docker tags based on the following events/attributes
+        tags: |
+          type=ref,event=branch,value=${{ matrix.push_tag }}
+          type=ref,event=branch,value=${{ matrix.push_tag }}-amd64
+          type=ref,event=branch,prefix=${{ matrix.push_tag }}-
+          type=ref,event=pr,prefix=${{ matrix.push_tag }}-pr-
+          type=semver,pattern={{version}},prefix=${{ matrix.push_tag }}-
+          type=semver,pattern={{major}}.{{minor}},prefix=${{ matrix.push_tag }}-
+          type=semver,pattern={{major}},prefix=${{ matrix.push_tag }}-
+
     - name: Build Docker Image
-      uses: docker/build-push-action@v5
+      uses: docker/build-push-action@v6
       with:
         context: .
         file: ./Dockerfile.opengl
         platforms: linux/amd64
         push: ${{ github.event_name != 'pull_request' }}
-        tags: ${{ matrix.push_tag }}
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        build-args: |
+            BASE_IMAGE=${{ matrix.base_image }}
+            BRANCH=${{ env.BRANCH }}
+            ROS_DISTRO=${{ matrix.ros_distro }}
+
+  build-arm64:
+    runs-on: 
+      - lcas-runc
+      - runc
+    strategy:
+        matrix:
+          include:
+            - base_image: ubuntu:jammy
+              ros_distro: humble
+              push_tag: jammy-humble-arm64
+            - base_image: nvidia/cuda:11.8.0-cudnn8-devel-ubuntu22.04
+              ros_distro: humble
+              push_tag: jammy-humble-cuda11.8-opengl-arm64
+            - base_image: nvidia/cuda:12.1.1-cudnn8-devel-ubuntu22.04
+              ros_distro: humble
+              push_tag: jammy-humble-cuda12.1-opengl-arm64
+            - base_image: nvidia/cuda:12.2.2-cudnn8-devel-ubuntu22.04
+              ros_distro: humble
+              push_tag: jammy-humble-cuda12.2-opengl-arm64
+            - base_image: nvidia/cuda:12.6.2-cudnn-devel-ubuntu22.04
+              ros_distro: humble
+              push_tag: jammy-humble-cuda12.6-opengl-arm64
+
+    steps:
+    - name: Node Js
+      uses: actions/setup-node@v4
+      with:
+        node-version: "^16.13.0 || >=18.0.0"
+    - uses: actions/checkout@v3
+    - name: What
+      run: echo "BRANCH=${GITHUB_REF##*/}" >> $GITHUB_ENV
+    - name: Docker Login LCAS
+      if: ${{ github.event_name != 'pull_request' }}
+      # You may pin to the exact commit or the version.
+      # uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
+      uses: docker/login-action@v3
+      with:
+        # Server address of Docker registry. If not set then will default to Docker Hub
+        registry: lcas.lincoln.ac.uk
+        # Username used to log against the Docker registry
+        username: ${{ secrets.LCAS_REGISTRY_PUSHER }}
+        # Password or personal access token used to log against the Docker registry
+        password: ${{ secrets.LCAS_REGISTRY_TOKEN }}
+
+    - name: Docker meta
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        labels: |
+          org.opencontainers.image.description=L-CAS ROS2 Docker Image with virtual X11 embedded (flavour: ${{ matrix.push_tag }})
+          org.opencontainers.image.authors=L-CAS Team
+        # list of Docker images to use as base name for tags
+        images: |
+          lcas.lincoln.ac.uk/lcas/ros
+        # generate Docker tags based on the following events/attributes
+        tags: |
+          type=ref,event=branch,value=${{ matrix.push_tag }}
+          type=ref,event=branch,prefix=${{ matrix.push_tag }}-
+          type=ref,event=pr,prefix=${{ matrix.push_tag }}-pr-
+          type=semver,pattern={{version}},prefix=${{ matrix.push_tag }}-
+          type=semver,pattern={{major}}.{{minor}},prefix=${{ matrix.push_tag }}-
+          type=semver,pattern={{major}},prefix=${{ matrix.push_tag }}-
+
+    - name: Build Docker Image
+      uses: docker/build-push-action@v6
+      with:
+        context: .
+        file: ./Dockerfile.opengl
+        platforms: linux/arm64
+        push: ${{ github.event_name != 'pull_request' }}
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
         build-args: |
             BASE_IMAGE=${{ matrix.base_image }}
             BRANCH=${{ env.BRANCH }}

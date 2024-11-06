@@ -56,7 +56,8 @@ RUN apt-get update \
   libglx0 \
   libegl1 \
   libxext6 \
-  libx11-6
+  libx11-6 \
+  && rm -rf /var/lib/apt/lists/*
 
 # Env vars for the nvidia-container-runtime.
 ENV NVIDIA_VISIBLE_DEVICES all
@@ -140,7 +141,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && \
     apt-get install -y lsb-release curl software-properties-common apt-transport-https && \
-    apt-get clean
+    rm -rf /var/lib/apt/lists/* 
 
 RUN sh -c 'echo "deb https://lcas.lincoln.ac.uk/apt/lcas $(lsb_release -sc) lcas" > /etc/apt/sources.list.d/lcas-latest.list' && \
     curl -s https://lcas.lincoln.ac.uk/apt/repo_signing.gpg | tee /etc/apt/trusted.gpg.d/lcas-latest.gpg
@@ -157,17 +158,23 @@ ENV DEBIAN_FRONTEND=
 FROM lcas as openglvnc
 
 ARG ENTRY_POINT=/opt/entrypoint.sh
+ARG TARGETARCH
 ENV ENTRY_POINT=${ENTRY_POINT}
 
 ENV DEBIAN_FRONTEND=noninteractive
-RUN curl -L -O https://github.com/VirtualGL/virtualgl/releases/download/3.1.1/virtualgl_3.1.1_amd64.deb && \
-    apt-get -y install ./virtualgl_3.1.1_amd64.deb && \
-    rm virtualgl_3.1.1_amd64.deb
-RUN curl -L -O https://github.com/TurboVNC/turbovnc/releases/download/3.1.1/turbovnc_3.1.1_amd64.deb && \
-    apt-get -y install ./turbovnc_3.1.1_amd64.deb && \
-    rm turbovnc_3.1.1_amd64.deb
+RUN curl -L -O https://github.com/VirtualGL/virtualgl/releases/download/3.1.1/virtualgl_3.1.1_${TARGETARCH}.deb && \
+    apt-get update && \
+    apt-get -y install ./virtualgl_3.1.1_${TARGETARCH}.deb && \
+    rm virtualgl_3.1.1_${TARGETARCH}.deb && rm -rf /var/lib/apt/lists/* 
+RUN curl -L -O https://github.com/TurboVNC/turbovnc/releases/download/3.1.1/turbovnc_3.1.1_${TARGETARCH}.deb && \
+    apt-get update && \
+    apt-get -y install ./turbovnc_3.1.1_${TARGETARCH}.deb && \
+    rm turbovnc_3.1.1_${TARGETARCH}.deb && rm -rf /var/lib/apt/lists/* 
 RUN addgroup --gid 1002 vglusers && adduser ros video && adduser ros vglusers
-RUN apt-get update && apt-get -y install xfce4-session xfce4-panel xfce4-terminal thunar xterm x11-utils python3-minimal python3-pip python3-numpy unzip less tmux screen
+RUN apt-get update && \
+    apt-get -y install xfce4-session xfce4-panel xfce4-terminal thunar xterm x11-utils python3-minimal python3-pip python3-numpy unzip less tmux screen && \
+    rm -rf /var/lib/apt/lists/*
+
 ENV DEBIAN_FRONTEND=
 
 # Install noVNC
