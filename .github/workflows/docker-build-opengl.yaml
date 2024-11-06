@@ -72,7 +72,7 @@ jobs:
 
   build-arm64:
     runs-on: 
-      - lcas
+      - lcas-runc
       - runc
     strategy:
         matrix:
