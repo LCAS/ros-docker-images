@@ -66,8 +66,8 @@ jobs:
           lcas.lincoln.ac.uk/lcas/ros
         # generate Docker tags based on the following events/attributes
         tags: |
-          type=raw,event=branch,value=${{ matrix.push_tag }}
-          type=raw,event=branch,value=${{ matrix.push_tag }}-amd64
+          type=ref,event=branch,value=${{ matrix.push_tag }}
+          type=ref,event=branch,value=${{ matrix.push_tag }}-amd64
           type=ref,event=branch,prefix=${{ matrix.push_tag }}-
           type=ref,event=pr,prefix=${{ matrix.push_tag }}-pr-
           type=semver,pattern={{version}},prefix=${{ matrix.push_tag }}-
@@ -141,7 +141,7 @@ jobs:
           lcas.lincoln.ac.uk/lcas/ros
         # generate Docker tags based on the following events/attributes
         tags: |
-          type=raw,event=branch,value=${{ matrix.push_tag }}
+          type=ref,event=branch,value=${{ matrix.push_tag }}
           type=ref,event=branch,prefix=${{ matrix.push_tag }}-
           type=ref,event=pr,prefix=${{ matrix.push_tag }}-pr-
           type=semver,pattern={{version}},prefix=${{ matrix.push_tag }}-
