@@ -14,7 +14,9 @@ on:
 
 jobs:
   build-amd64:
-    runs-on: lcas
+    runs-on: 
+      - lcas
+      - cuda
     strategy:
         matrix:
           include:
@@ -69,7 +71,9 @@ jobs:
             ROS_DISTRO=${{ matrix.ros_distro }}
 
   build-arm64:
-    runs-on: lcas-runc
+    runs-on: 
+      - lcas
+      - runc
     strategy:
         matrix:
           include:

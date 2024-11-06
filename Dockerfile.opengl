@@ -160,12 +160,12 @@ ARG ENTRY_POINT=/opt/entrypoint.sh
 ENV ENTRY_POINT=${ENTRY_POINT}
 
 ENV DEBIAN_FRONTEND=noninteractive
-RUN curl -L -O https://github.com/VirtualGL/virtualgl/releases/download/3.1.1/virtualgl_3.1.1_amd64.deb && \
-    apt-get -y install ./virtualgl_3.1.1_amd64.deb && \
-    rm virtualgl_3.1.1_amd64.deb
-RUN curl -L -O https://github.com/TurboVNC/turbovnc/releases/download/3.1.1/turbovnc_3.1.1_amd64.deb && \
-    apt-get -y install ./turbovnc_3.1.1_amd64.deb && \
-    rm turbovnc_3.1.1_amd64.deb
+RUN curl -L -O https://github.com/VirtualGL/virtualgl/releases/download/3.1.1/virtualgl_3.1.1_${TARGETARCH}.deb && \
+    apt-get -y install ./virtualgl_3.1.1_${TARGETARCH}.deb && \
+    rm virtualgl_3.1.1_${TARGETARCH}.deb
+RUN curl -L -O https://github.com/TurboVNC/turbovnc/releases/download/3.1.1/turbovnc_3.1.1_${TARGETARCH}.deb && \
+    apt-get -y install ./turbovnc_3.1.1_${TARGETARCH}.deb && \
+    rm turbovnc_3.1.1_${TARGETARCH}.deb
 RUN addgroup --gid 1002 vglusers && adduser ros video && adduser ros vglusers
 RUN apt-get update && apt-get -y install xfce4-session xfce4-panel xfce4-terminal thunar xterm x11-utils python3-minimal python3-pip python3-numpy unzip less tmux screen
 ENV DEBIAN_FRONTEND=
