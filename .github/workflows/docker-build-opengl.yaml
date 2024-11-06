@@ -30,6 +30,9 @@ jobs:
             - base_image: nvidia/cuda:12.2.2-cudnn8-devel-ubuntu22.04
               ros_distro: humble
               push_tag: lcas.lincoln.ac.uk/lcas/ros:jammy-humble-cuda12.2-opengl
+            - base_image: nvidia/cuda:12.6.2-cudnn-devel-ubuntu22.04
+              ros_distro: humble
+              push_tag: lcas.lincoln.ac.uk/lcas/ros:jammy-humble-cuda12.6-opengl
   
     steps:
     - name: Node Js
