@@ -202,6 +202,8 @@ RUN cat <<EOF > /usr/share/glvnd/egl_vendor.d/10_nvidia.json
 EOF
 
 COPY start-turbovnc.sh /opt/nvidia/entrypoint.d/90-turbovnc.sh
+COPY lcas.jpg /usr/share/backgrounds/xfce/xfce-teal.jpg
+COPY lcas.jpg /usr/share/backgrounds/xfce/
 RUN echo "source /opt/ros/${ROS_DISTRO}/setup.bash" > /opt/nvidia/entrypoint.d/91-ros.sh
 
 COPY entrypoint.sh /opt/entrypoint.sh
