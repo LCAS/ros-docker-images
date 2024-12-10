@@ -37,6 +37,9 @@ jobs:
               push_tag: jammy-humble-cuda12.6-opengl
   
     steps:
+    # set up buildx
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
     - name: Node Js
       uses: actions/setup-node@v4
       with:
