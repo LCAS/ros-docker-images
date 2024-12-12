@@ -246,4 +246,6 @@ ENV VGL_DISPLAY=egl
 ENV VGL_WM=1
 ENV VGL_PROBEGLX=0
 ENV LD_PRELOAD=libdlfaker.so:libvglfaker.so
+ENV SHELL=/bin/bash
+
 
