@@ -79,6 +79,9 @@ jobs:
           type=semver,pattern={{major}}.{{minor}},prefix=${{ matrix.push_tag }}-
           type=semver,pattern={{major}},prefix=${{ matrix.push_tag }}-
 
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+      
     - name: Build Docker Image
       uses: docker/build-push-action@v6
       with:
@@ -160,6 +163,9 @@ jobs:
           type=semver,pattern={{major}}.{{minor}},prefix=${{ matrix.push_tag }}-
           type=semver,pattern={{major}},prefix=${{ matrix.push_tag }}-
 
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+      
     - name: Build Docker Image
       uses: docker/build-push-action@v6
       with:
