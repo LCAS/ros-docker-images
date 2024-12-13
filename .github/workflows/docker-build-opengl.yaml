@@ -86,7 +86,8 @@ jobs:
         file: ./Dockerfile.opengl
         platforms: linux/amd64
         push: ${{ github.event_name != 'pull_request' }}
-        cache-from: type=registry,ref=lcas.lincoln.ac.uk/lcas/ros:${{ matrix.push_tag }}
+        cache-from: type=registry,ref=lcas.lincoln.ac.uk/cache/lcas/ros:${{ matrix.push_tag }}
+        cache-to: type=registry,ref=lcas.lincoln.ac.uk/cache/lcas/ros:${{ matrix.push_tag }}
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
         build-args: |
@@ -165,7 +166,8 @@ jobs:
         context: .
         file: ./Dockerfile.opengl
         platforms: linux/arm64
-        cache-from: type=registry,ref=lcas.lincoln.ac.uk/lcas/ros:${{ matrix.push_tag }}
+        cache-from: type=registry,ref=lcas.lincoln.ac.uk/cache/lcas/ros:${{ matrix.push_tag }}
+        cache-to: type=registry,ref=lcas.lincoln.ac.uk/cache/lcas/ros:${{ matrix.push_tag }}
         push: ${{ github.event_name != 'pull_request' }}
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
