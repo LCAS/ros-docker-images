@@ -70,10 +70,10 @@ jobs:
           lcas.lincoln.ac.uk/lcas/ros
         # generate Docker tags based on the following events/attributes
         tags: |
+          type=raw,value=${{ matrix.push_tag }}-staging
           type=raw,enable=${{ github.event_name != 'pull_request' }},value=${{ matrix.push_tag }}
           type=raw,enable=${{ github.event_name != 'pull_request' }},value=${{ matrix.push_tag }}-amd64
-          type=ref,event=branch,prefix=${{ matrix.push_tag }}-
-          type=ref,event=pr,prefix=${{ matrix.push_tag }}-pr-
+          type=ref,enable=${{ github.event_name != 'pull_request' }},event=branch,prefix=${{ matrix.push_tag }}-
           type=semver,pattern={{version}},prefix=${{ matrix.push_tag }}-
           type=semver,pattern={{major}}.{{minor}},prefix=${{ matrix.push_tag }}-
           type=semver,pattern={{major}},prefix=${{ matrix.push_tag }}-
@@ -154,9 +154,9 @@ jobs:
           lcas.lincoln.ac.uk/lcas/ros
         # generate Docker tags based on the following events/attributes
         tags: |
+          type=raw,value=${{ matrix.push_tag }}-staging
           type=raw,enable=${{ github.event_name != 'pull_request' }},value=${{ matrix.push_tag }}
-          type=ref,event=branch,prefix=${{ matrix.push_tag }}-
-          type=ref,event=pr,prefix=${{ matrix.push_tag }}-pr-
+          type=ref,enable=${{ github.event_name != 'pull_request' }},event=branch,prefix=${{ matrix.push_tag }}-
           type=semver,pattern={{version}},prefix=${{ matrix.push_tag }}-
           type=semver,pattern={{major}}.{{minor}},prefix=${{ matrix.push_tag }}-
           type=semver,pattern={{major}},prefix=${{ matrix.push_tag }}-
