@@ -192,8 +192,8 @@ ENV DEBIAN_FRONTEND=
 
 # Install noVNC
 
-ENV NOVNC_VERSION=1.5.0
-ENV WEBSOCKETIFY_VERSION=0.12.0
+ENV NOVNC_VERSION=1.4.0
+ENV WEBSOCKETIFY_VERSION=0.10.0
 
 RUN mkdir -p /usr/local/novnc && \
     curl -sSL https://github.com/novnc/noVNC/archive/v${NOVNC_VERSION}.zip -o /tmp/novnc-install.zip && \
