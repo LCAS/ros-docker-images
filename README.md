@@ -104,7 +104,7 @@ The matrix includes the following configurations:
 
 5. **Build and Push Docker Image**:
     - Uses the `docker/build-push-action@v5` action to build and push the Docker image.
-    - Builds the Docker image using the `./Dockerfile.opengl` file for opengl base image support with cuda, or `./Dockerfile` for normal ROS based images.
+    - Builds the Docker image using the `./nvidia.dockerfile` file for opengl base image support with cuda, or `./Dockerfile` for normal ROS based images.
     - Sets the platform to `linux/amd64`.
     - Pushes the image unless it is a pull request.
     - Tags the image with the `matrix.push_tag`.
@@ -112,7 +112,7 @@ The matrix includes the following configurations:
    ```bash
       with:
         context: .
-        file: ./Dockerfile.opengl
+        file: ./nvidia.dockerfile
         platforms: linux/amd64
         push: ${{ github.event_name != 'pull_request' }}
         tags: ${{ matrix.push_tag }}
