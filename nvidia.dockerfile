@@ -143,11 +143,11 @@ FROM dev as lcas
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && \
-    apt-get install -y lsb-release curl software-properties-common apt-transport-https && \
+    apt-get install -y lsb-release curl software-properties-common unzip apt-transport-https && \
     rm -rf /var/lib/apt/lists/* 
 
 RUN sh -c 'echo "deb https://lcas.lincoln.ac.uk/apt/lcas $(lsb_release -sc) lcas" > /etc/apt/sources.list.d/lcas-latest.list' && \
-    curl -s https://lcas.lincoln.ac.uk/apt/repo_signing.gpg | tee /etc/apt/trusted.gpg.d/lcas-latest.gpg
+    curl -s https://lcas.lincoln.ac.uk/apt/repo_signing.gpg > /etc/apt/trusted.gpg.d/lcas-latest.gpg
 
 RUN rosdep init || true
 RUN curl -o /etc/ros/rosdep/sources.list.d/20-default.list https://raw.githubusercontent.com/LCAS/rosdistro/master/rosdep/sources.list.d/20-default.list && \
@@ -156,16 +156,33 @@ RUN curl -o /etc/ros/rosdep/sources.list.d/20-default.list https://raw.githubuse
 ENV ROSDISTRO_INDEX_URL=https://raw.github.com/LCAS/rosdistro/master/index-v4.yaml
 
 # install Zenoh
-RUN mkdir -p /tmp/zenoh-build && \ 
-    cd /tmp/zenoh-build && \
-    (curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y) && \
-    git clone --depth 1 -b 1.1.0 https://github.com/eclipse-zenoh/zenoh-plugin-ros2dds.git && \
-    cd /tmp/zenoh-build/zenoh-plugin-ros2dds && \
-    /bin/bash -c "source '$HOME/.cargo/env'; cargo build --release -p zenoh-bridge-ros2dds" && \
-    install target/release/zenoh-bridge-ros2dds /usr/local/bin/
+# RUN mkdir -p /tmp/zenoh-build && \ 
+#     cd /tmp/zenoh-build && \
+#     (curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y) && \
+#     git clone --depth 1 -b 1.1.0 https://github.com/eclipse-zenoh/zenoh-plugin-ros2dds.git && \
+#     cd /tmp/zenoh-build/zenoh-plugin-ros2dds && \
+#     /bin/bash -c "source '$HOME/.cargo/env'; cargo build --release -p zenoh-bridge-ros2dds" && \
+#     install target/release/zenoh-bridge-ros2dds /usr/local/bin/
 
+ENV ZENOH_BRIDGE_VERSION=1.1.0
+RUN cd /tmp; \
+    if [ "$(dpkg --print-architecture)" = "arm64" ]; then \
+      curl -L -O https://github.com/eclipse-zenoh/zenoh-plugin-ros2dds/releases/download/${ZENOH_BRIDGE_VERSION}/zenoh-plugin-ros2dds-${ZENOH_BRIDGE_VERSION}-arm-unknown-linux-gnu-standalone.zip; \
+    else \
+      curl -L -O https://github.com/eclipse-zenoh/zenoh-plugin-ros2dds/releases/download/${ZENOH_BRIDGE_VERSION}/zenoh-plugin-ros2dds-${ZENOH_BRIDGE_VERSION}-x86_64-unknown-linux-gnu-standalone.zip; \
+    fi; \
+    unzip zenoh-plugin-ros2dds-*.zip && \
+    mv zenoh-bridge-ros2dds /usr/local/bin/ && \
+    chmod +x /usr/local/bin/zenoh-bridge-ros2dds && \
+    ldconfig && \
+    rm -rf zenoh-*
 
-ENV DEBIAN_FRONTEND=
+# install nodejs
+RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash -
+RUN apt-get update && apt-get install -y nodejs sudo && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
 
 ###########################################
 FROM lcas as openglvnc
@@ -185,7 +202,8 @@ RUN curl -L -O https://github.com/TurboVNC/turbovnc/releases/download/3.1.1/turb
     rm turbovnc_3.1.1_${TARGETARCH}.deb && rm -rf /var/lib/apt/lists/* 
 RUN addgroup --gid 1002 vglusers && adduser ros video && adduser ros vglusers
 RUN apt-get update && \
-    apt-get -y install xfce4-session xfce4-panel xfce4-terminal thunar xterm x11-utils python3-minimal python3-pip python3-numpy unzip less tmux screen && \
+    apt-get -y install xfce4-session xfce4-panel xfce4-terminal thunar xterm x11-utils python3-minimal python3-pip python3-numpy python3-venv unzip less tmux screen \
+        geany-plugins geany && \
     rm -rf /var/lib/apt/lists/*
 
 ENV DEBIAN_FRONTEND=
@@ -224,17 +242,8 @@ RUN echo "source /opt/ros/${ROS_DISTRO}/setup.bash" > /opt/entrypoint.d/89-ros.s
 COPY entrypoint.sh /opt/entrypoint.sh
 RUN chmod +x /opt/entrypoint.sh
 
-# replace all backgrounds with lcas.png
-#RUN for f in /usr/share/backgrounds/xfce/*.jpg; do ln -s -f lcas.jpg $f; done
-#RUN for f in /usr/share/backgrounds/xfce/*.png; do ln -s -f lcas.png $f; done
-#RUN rm /usr/share/backgrounds/xfce/*.svg
-
-#COPY lcas.jpg /usr/share/backgrounds/xfce/xfce-teal.jpg
-#COPY lcas.png /usr/share/backgrounds/xfce/xfce-verticals.png
 COPY lcas.jpg /usr/share/backgrounds/xfce/
 COPY lcas.png /usr/share/backgrounds/xfce/
-
-
 
 ENTRYPOINT ["/opt/entrypoint.sh"]
 EXPOSE 5801
@@ -242,7 +251,48 @@ EXPOSE 5801
 ###########################################
 FROM openglvnc as user
 USER ros
+ENV HOME=/home/ros
 WORKDIR ${HOME}
+RUN mkdir -p ${HOME}/.local/bin 
+
+# install a Python venv overlay to allow pip and friends
+ENV PYTHONUNBUFFERED=1
+RUN python3 -m venv --system-site-packages --upgrade-deps ${HOME}/.local/venv 
+# Enable venv
+ENV PATH="${HOME}/.local/venv/bin:$PATH"
+COPY --chown=ros:ros requirements.txt /tmp/requirements.txt
+RUN pip install --no-cache-dir -r /tmp/requirements.txt && \
+    rm /tmp/requirements.txt
+
+# track commit of the image    
+COPY --chown=ros:ros .gi? /tmp/gittemp/.git
+RUN git -C /tmp/gittemp log -n 1 --pretty=format:"%H" > ${HOME}/.version
+
+RUN mkdir -p ${HOME}/Desktop
+RUN echo "# Welcome to the L-CAS Desktop Container.\n" > ${HOME}/Desktop/info.md; \
+    echo "This is a Virtual Desktop provided by [L-CAS](https://lcas.lincoln.ac.uk/)." >> ${HOME}/Desktop/info.md; \
+    echo "It provides an installation of ROS2 **'${ROS_DISTRO}'**, running on **Ubuntu '$(lsb_release -s -c)'** on architecture **'$(uname -m)'**.\n" >> ${HOME}/Desktop/info.md; \
+    echo "You can access it via a web browser at port 5801, e.g. http://localhost:5801 (or wherever you have exposed its internal port)." >> ${HOME}/Desktop/info.md; \
+    echo "\n" >> ${HOME}/Desktop/info.md; \
+    echo "*built from https://github.com/LCAS/ros-docker-images\n(commit: [\`$(cat ${HOME}/.version)\`](https://github.com/LCAS/ros-docker-images/tree/$(cat ${HOME}/.version)/)),\nprovided to you by [L-CAS](https://lcas.lincoln.ac.uk/).*" >> ${HOME}/Desktop/info.md; \
+    echo "\n" >> ${HOME}/Desktop/info.md; \
+    echo "## Installed Software\n" >> ${HOME}/Desktop/info.md; \
+    echo "The following software is installed:" >> ${HOME}/Desktop/info.md; \
+    echo "* ROS2 '${ROS_DISTRO}', with rudimentary packages installed (base)." >> ${HOME}/Desktop/info.md; \
+    echo "* The L-CAS ROS2 [apt repositories](https://lcas.lincoln.ac.uk/apt/lcas) are enabled." >> ${HOME}/Desktop/info.md; \
+    echo "* The L-CAS [rosdistro](https://github.com/LCAS/rosdistro) is enabled." >> ${HOME}/Desktop/info.md; \
+    echo "* The Zenoh ROS2 bridge \`zenoh-bridge-ros2dds\` (version: ${ZENOH_BRIDGE_VERSION})." >> ${HOME}/Desktop/info.md; \
+    echo "* A Python Venv overlay in \`${HOME}/.local/venv\` (active by default); running $(python --version)." >> ${HOME}/Desktop/info.md; \
+    echo "* Node.js (with npm) in version $(node --version)." >> ${HOME}/Desktop/info.md; \
+    echo "* password-less \`sudo\` to install more packages." >> ${HOME}/Desktop/info.md; \
+    echo "\n" >> ${HOME}/Desktop/info.md; \
+    echo "## Default Environment\n" >> ${HOME}/Desktop/info.md; \
+    echo "The following environment variables are set by default:" >> ${HOME}/Desktop/info.md; \
+    echo '```' >> ${HOME}/Desktop/info.md; \
+    env >> ${HOME}/Desktop/info.md; \
+    echo '```' >> ${HOME}/Desktop/info.md; \
+    chmod -w ${HOME}/Desktop/info.md
+COPY --chown=ros:ros --chmod=444 README.md ${HOME}/Desktop/README.md
 
 RUN mkdir -p ~/.config/rosdistro && echo "index_url: https://raw.github.com/LCAS/rosdistro/master/index-v4.yaml" > ~/.config/rosdistro/config.yaml
 RUN sudo apt-get purge -y xfce4-screensaver
@@ -250,7 +300,7 @@ RUN sudo apt-get purge -y xfce4-screensaver
 ENV DISPLAY=:1
 ENV TVNC_VGL=1
 ENV VGL_ISACTIVE=1
-ENV VGL_FPS=30
+ENV VGL_FPS=25
 ENV VGL_COMPRESS=0
 ENV VGL_DISPLAY=egl
 ENV VGL_WM=1

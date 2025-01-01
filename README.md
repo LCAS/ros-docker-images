@@ -1,4 +1,4 @@
-# Official L-CAS enabled ROS base images
+# Official L-CAS enabled ROS base images (with or without Desktop)
 
 Use this as the base image for your ROS containerisation projects. 
 
