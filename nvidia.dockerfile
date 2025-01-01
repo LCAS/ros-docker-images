@@ -252,9 +252,9 @@ EXPOSE 5801
 # Install VSCode
 
 RUN if [ "$(dpkg --print-architecture)" = "arm64" ]; then \
-        curl -L -o /tmp/vscode.deb 'https://code.visualstudio.com/sha/download?build=stable&os=linux-deb-arm64' ; \
+        curl -k -L -o /tmp/vscode.deb 'https://code.visualstudio.com/sha/download?build=stable&os=linux-deb-arm64' ; \
     else \
-        curl -L -o /tmp/vscode.deb 'https://code.visualstudio.com/sha/download?build=stable&os=linux-deb-x64' ; \
+        curl -k -L -o /tmp/vscode.deb 'https://code.visualstudio.com/sha/download?build=stable&os=linux-deb-x64' ; \
     fi && \
     apt-get update && apt-get install -y /tmp/vscode.deb && \
     rm /tmp/vscode.deb && rm -rf /var/lib/apt/lists/*
