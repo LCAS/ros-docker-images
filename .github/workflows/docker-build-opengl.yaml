@@ -39,7 +39,7 @@ jobs:
 
             - base_image: nvidia/cuda:12.6.3-cudnn-devel-ubuntu24.04
               ros_distro: rolling
-              push_tag: noble-rolling-12.6.3-opengl
+              push_tag: noble-rolling-cuda12.6-opengl
   
     steps:
     - name: Node Js
@@ -128,7 +128,7 @@ jobs:
 
             - base_image: nvidia/cuda:12.6.3-cudnn-devel-ubuntu24.04
               ros_distro: rolling
-              push_tag: noble-rolling-12.6.3-opengl-arm64
+              push_tag: noble-rolling-cuda12.6-opengl-arm64
 
     steps:
     - name: Node Js

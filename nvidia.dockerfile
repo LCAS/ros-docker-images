@@ -203,10 +203,13 @@ RUN curl -L -O https://github.com/TurboVNC/turbovnc/releases/download/3.1.1/turb
 RUN addgroup --gid 1002 vglusers && adduser ros video && adduser ros vglusers
 RUN apt-get update && \
     apt-get -y install xfce4-session xfce4-panel xfce4-terminal thunar xterm x11-utils python3-minimal python3-pip python3-numpy python3-venv unzip less tmux screen \
-        geany-plugins geany && \
+        geany-plugins geany \
+        ros-${ROS_DISTRO}-rmw-cyclonedds-cpp \
+        && \
     rm -rf /var/lib/apt/lists/*
 
-ENV DEBIAN_FRONTEND=
+ENV RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+
 
 # Install noVNC
 

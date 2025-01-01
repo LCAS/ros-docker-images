@@ -1,6 +1,6 @@
 services:
   lcas_desktop:
-    image: lcas.lincoln.ac.uk/lcas/ros:noble-rolling-12.6.3-opengl
+    image: lcas.lincoln.ac.uk/lcas/ros:noble-rolling-cuda12.6-opengl
     restart: unless-stopped
     build:
       context: .
@@ -12,6 +12,7 @@ services:
       - "${VNC_PORT:-5801}:5801"
     command: bash -c "while true; do sleep 5; done"
     volumes:
+      # persist user's home
       - user_home:/home/ros
 
 volumes:
