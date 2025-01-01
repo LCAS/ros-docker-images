@@ -264,6 +264,38 @@ RUN curl -sSLfo /tmp/zrok-install.bash https://get.openziti.io/install.bash && \
     bash /tmp/zrok-install.bash zrok && \
     rm /tmp/zrok-install.bash
 
+
+RUN mkdir -p /opt/image
+
+COPY .gi? /tmp/gittemp/.git
+RUN git -C /tmp/gittemp log -n 1 --pretty=format:"%H" > /opt/image/version
+
+RUN echo "# Welcome to the L-CAS Desktop Container.\n" > /opt/image/info.md; \
+    echo "This is a Virtual Desktop provided by [L-CAS](https://lcas.lincoln.ac.uk/)." >> /opt/image/info.md; \
+    echo "It provides an installation of ROS2 **'${ROS_DISTRO}'**, running on **Ubuntu '$(lsb_release -s -c)'** on architecture **'$(uname -m)'**.\n" >> /opt/image/info.md; \
+    echo "You can access it via a web browser at port 5801, e.g. http://localhost:5801 (or wherever you have exposed its internal port)." >> /opt/image/info.md; \
+    echo "\n" >> /opt/image/info.md; \
+    echo "*built from https://github.com/LCAS/ros-docker-images\n(commit: [\`$(cat /opt/image/version)\`](https://github.com/LCAS/ros-docker-images/tree/$(cat /opt/image/version)/)),\nprovided to you by [L-CAS](https://lcas.lincoln.ac.uk/).*" >> /opt/image/info.md; \
+    echo "\n" >> /opt/image/info.md; \
+    echo "## Installed Software\n" >> /opt/image/info.md; \
+    echo "The following software is installed:" >> /opt/image/info.md; \
+    echo "* ROS2 \`${ROS_DISTRO}\`, with rudimentary packages installed (base)." >> /opt/image/info.md; \
+    echo "* VSCode (use as \`code\`, sandbox disabled)" >> /opt/image/info.md; \
+    echo "* The L-CAS ROS2 [apt repositories](https://lcas.lincoln.ac.uk/apt/lcas) are enabled." >> /opt/image/info.md; \
+    echo "* The L-CAS [rosdistro](https://github.com/LCAS/rosdistro) is enabled." >> /opt/image/info.md; \
+    echo "* The Zenoh ROS2 bridge \`zenoh-bridge-ros2dds\` (version: ${ZENOH_BRIDGE_VERSION})." >> /opt/image/info.md; \
+    echo "* A Python Venv overlay in \`/home/ros/.local/venv\` (active by default)." >> /opt/image/info.md; \
+    echo "* Node.js (with npm) in version $(node --version)." >> /opt/image/info.md; \
+    echo "* password-less \`sudo\` to install more packages." >> /opt/image/info.md; \
+    echo "\n" >> /opt/image/info.md; \
+    echo "## Default Environment\n" >> /opt/image/info.md; \
+    echo "The following environment variables are set by default:" >> /opt/image/info.md; \
+    echo '```' >> /opt/image/info.md; \
+    env >> /opt/image/info.md; \
+    echo '```' >> /opt/image/info.md; \
+    chmod -w /opt/image/info.md
+COPY README.md /opt/image/README.md
+    
 ###########################################
 FROM openglvnc as user
 USER ros
@@ -281,35 +313,10 @@ RUN pip install --no-cache-dir -r /tmp/requirements.txt && \
     rm /tmp/requirements.txt
 
 # track commit of the image    
-COPY --chown=ros:ros .gi? /tmp/gittemp/.git
-RUN git -C /tmp/gittemp log -n 1 --pretty=format:"%H" > ${HOME}/.version
 
-RUN mkdir -p ${HOME}/Desktop
-RUN echo "# Welcome to the L-CAS Desktop Container.\n" > ${HOME}/Desktop/info.md; \
-    echo "This is a Virtual Desktop provided by [L-CAS](https://lcas.lincoln.ac.uk/)." >> ${HOME}/Desktop/info.md; \
-    echo "It provides an installation of ROS2 **'${ROS_DISTRO}'**, running on **Ubuntu '$(lsb_release -s -c)'** on architecture **'$(uname -m)'**.\n" >> ${HOME}/Desktop/info.md; \
-    echo "You can access it via a web browser at port 5801, e.g. http://localhost:5801 (or wherever you have exposed its internal port)." >> ${HOME}/Desktop/info.md; \
-    echo "\n" >> ${HOME}/Desktop/info.md; \
-    echo "*built from https://github.com/LCAS/ros-docker-images\n(commit: [\`$(cat ${HOME}/.version)\`](https://github.com/LCAS/ros-docker-images/tree/$(cat ${HOME}/.version)/)),\nprovided to you by [L-CAS](https://lcas.lincoln.ac.uk/).*" >> ${HOME}/Desktop/info.md; \
-    echo "\n" >> ${HOME}/Desktop/info.md; \
-    echo "## Installed Software\n" >> ${HOME}/Desktop/info.md; \
-    echo "The following software is installed:" >> ${HOME}/Desktop/info.md; \
-    echo "* ROS2 \`${ROS_DISTRO}\`, with rudimentary packages installed (base)." >> ${HOME}/Desktop/info.md; \
-    echo "* VSCode version \`$(code --version | tr "\n" " ")\`" >> ${HOME}/Desktop/info.md; \
-    echo "* The L-CAS ROS2 [apt repositories](https://lcas.lincoln.ac.uk/apt/lcas) are enabled." >> ${HOME}/Desktop/info.md; \
-    echo "* The L-CAS [rosdistro](https://github.com/LCAS/rosdistro) is enabled." >> ${HOME}/Desktop/info.md; \
-    echo "* The Zenoh ROS2 bridge \`zenoh-bridge-ros2dds\` (version: ${ZENOH_BRIDGE_VERSION})." >> ${HOME}/Desktop/info.md; \
-    echo "* A Python Venv overlay in \`${HOME}/.local/venv\` (active by default); running $(python --version)." >> ${HOME}/Desktop/info.md; \
-    echo "* Node.js (with npm) in version $(node --version)." >> ${HOME}/Desktop/info.md; \
-    echo "* password-less \`sudo\` to install more packages." >> ${HOME}/Desktop/info.md; \
-    echo "\n" >> ${HOME}/Desktop/info.md; \
-    echo "## Default Environment\n" >> ${HOME}/Desktop/info.md; \
-    echo "The following environment variables are set by default:" >> ${HOME}/Desktop/info.md; \
-    echo '```' >> ${HOME}/Desktop/info.md; \
-    env >> ${HOME}/Desktop/info.md; \
-    echo '```' >> ${HOME}/Desktop/info.md; \
-    chmod -w ${HOME}/Desktop/info.md
-COPY --chown=ros:ros --chmod=444 README.md ${HOME}/Desktop/README.md
+RUN mkdir -p ${HOME}/Desktop/ && \
+    ln -s /opt/image/info.md ${HOME}/Desktop/info.md && \
+    ln -s /opt/image/README.md ${HOME}/Desktop/README.md
 
 # disable sandbox in VSCode
 RUN echo "alias code='code --no-sandbox'" >> ${HOME}/.bashrc
