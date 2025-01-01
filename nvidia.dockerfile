@@ -215,16 +215,26 @@ RUN cat <<EOF > /usr/share/glvnd/egl_vendor.d/10_nvidia.json
 EOF
 
 COPY start-turbovnc.sh /opt/nvidia/entrypoint.d/90-turbovnc.sh
-COPY lcas.jpg /usr/share/backgrounds/xfce/xfce-teal.jpg
-COPY lcas.png /usr/share/backgrounds/xfce/xfce-verticals.png
-COPY lcas.jpg /usr/share/backgrounds/xfce/
-COPY lcas.png /usr/share/backgrounds/xfce/
-RUN echo "source /opt/ros/${ROS_DISTRO}/setup.bash" > /opt/nvidia/entrypoint.d/91-ros.sh
+COPY start-turbovnc.sh /opt/entrypoint.d/90-turbovnc.sh 
+RUN chmod +x /opt/nvidia/entrypoint.d/90-turbovnc.sh /opt/entrypoint.d/90-turbovnc.sh
+
+RUN echo "source /opt/ros/${ROS_DISTRO}/setup.bash" > /opt/nvidia/entrypoint.d/89-ros.sh
+RUN echo "source /opt/ros/${ROS_DISTRO}/setup.bash" > /opt/entrypoint.d/89-ros.sh
 
 COPY entrypoint.sh /opt/entrypoint.sh
 RUN chmod +x /opt/entrypoint.sh
-COPY start-turbovnc.sh /opt/entrypoint.d/90-turbovnc.sh
-RUN echo "source /opt/ros/${ROS_DISTRO}/setup.bash" > /opt/entrypoint.d/91-ros.sh
+
+# replace all backgrounds with lcas.png
+#RUN for f in /usr/share/backgrounds/xfce/*.jpg; do ln -s -f lcas.jpg $f; done
+#RUN for f in /usr/share/backgrounds/xfce/*.png; do ln -s -f lcas.png $f; done
+#RUN rm /usr/share/backgrounds/xfce/*.svg
+
+#COPY lcas.jpg /usr/share/backgrounds/xfce/xfce-teal.jpg
+#COPY lcas.png /usr/share/backgrounds/xfce/xfce-verticals.png
+COPY lcas.jpg /usr/share/backgrounds/xfce/
+COPY lcas.png /usr/share/backgrounds/xfce/
+
+
 
 ENTRYPOINT ["/opt/entrypoint.sh"]
 EXPOSE 5801
