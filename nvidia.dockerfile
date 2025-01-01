@@ -101,7 +101,7 @@ RUN apt-get update && \
 RUN rosdep init || echo "rosdep already initialized"
 
 ARG USERNAME=ros
-ARG USER_UID=1000
+ARG USER_UID=1001
 ARG USER_GID=$USER_UID
 
 # Create a non-root user
@@ -143,11 +143,11 @@ FROM dev as lcas
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && \
-    apt-get install -y lsb-release curl software-properties-common apt-transport-https && \
+    apt-get install -y lsb-release curl software-properties-common unzip apt-transport-https && \
     rm -rf /var/lib/apt/lists/* 
 
 RUN sh -c 'echo "deb https://lcas.lincoln.ac.uk/apt/lcas $(lsb_release -sc) lcas" > /etc/apt/sources.list.d/lcas-latest.list' && \
-    curl -s https://lcas.lincoln.ac.uk/apt/repo_signing.gpg | tee /etc/apt/trusted.gpg.d/lcas-latest.gpg
+    curl -s https://lcas.lincoln.ac.uk/apt/repo_signing.gpg > /etc/apt/trusted.gpg.d/lcas-latest.gpg
 
 RUN rosdep init || true
 RUN curl -o /etc/ros/rosdep/sources.list.d/20-default.list https://raw.githubusercontent.com/LCAS/rosdistro/master/rosdep/sources.list.d/20-default.list && \
@@ -156,16 +156,33 @@ RUN curl -o /etc/ros/rosdep/sources.list.d/20-default.list https://raw.githubuse
 ENV ROSDISTRO_INDEX_URL=https://raw.github.com/LCAS/rosdistro/master/index-v4.yaml
 
 # install Zenoh
-RUN mkdir -p /tmp/zenoh-build && \ 
-    cd /tmp/zenoh-build && \
-    (curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y) && \
-    git clone --depth 1 -b 1.1.0 https://github.com/eclipse-zenoh/zenoh-plugin-ros2dds.git && \
-    cd /tmp/zenoh-build/zenoh-plugin-ros2dds && \
-    /bin/bash -c "source '$HOME/.cargo/env'; cargo build --release -p zenoh-bridge-ros2dds" && \
-    install target/release/zenoh-bridge-ros2dds /usr/local/bin/
+# RUN mkdir -p /tmp/zenoh-build && \ 
+#     cd /tmp/zenoh-build && \
+#     (curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y) && \
+#     git clone --depth 1 -b 1.1.0 https://github.com/eclipse-zenoh/zenoh-plugin-ros2dds.git && \
+#     cd /tmp/zenoh-build/zenoh-plugin-ros2dds && \
+#     /bin/bash -c "source '$HOME/.cargo/env'; cargo build --release -p zenoh-bridge-ros2dds" && \
+#     install target/release/zenoh-bridge-ros2dds /usr/local/bin/
 
+ENV ZENOH_BRIDGE_VERSION=1.1.0
+RUN cd /tmp; \
+    if [ "$(dpkg --print-architecture)" = "arm64" ]; then \
+      curl -L -O https://github.com/eclipse-zenoh/zenoh-plugin-ros2dds/releases/download/${ZENOH_BRIDGE_VERSION}/zenoh-plugin-ros2dds-${ZENOH_BRIDGE_VERSION}-aarch64-unknown-linux-gnu-standalone.zip; \
+    else \
+      curl -L -O https://github.com/eclipse-zenoh/zenoh-plugin-ros2dds/releases/download/${ZENOH_BRIDGE_VERSION}/zenoh-plugin-ros2dds-${ZENOH_BRIDGE_VERSION}-x86_64-unknown-linux-gnu-standalone.zip; \
+    fi; \
+    unzip zenoh-plugin-ros2dds-*.zip && \
+    mv zenoh-bridge-ros2dds /usr/local/bin/ && \
+    chmod +x /usr/local/bin/zenoh-bridge-ros2dds && \
+    ldconfig && \
+    rm -rf zenoh-*
 
-ENV DEBIAN_FRONTEND=
+# install nodejs
+RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash -
+RUN apt-get update && apt-get install -y nodejs sudo && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
 
 ###########################################
 FROM lcas as openglvnc
@@ -185,7 +202,8 @@ RUN curl -L -O https://github.com/TurboVNC/turbovnc/releases/download/3.1.1/turb
     rm turbovnc_3.1.1_${TARGETARCH}.deb && rm -rf /var/lib/apt/lists/* 
 RUN addgroup --gid 1002 vglusers && adduser ros video && adduser ros vglusers
 RUN apt-get update && \
-    apt-get -y install xfce4-session xfce4-panel xfce4-terminal thunar xterm x11-utils python3-minimal python3-pip python3-numpy unzip less tmux screen && \
+    apt-get -y install xfce4-session xfce4-panel xfce4-terminal thunar xterm x11-utils python3-minimal python3-pip python3-numpy python3-venv unzip less tmux screen \
+        geany-plugins geany && \
     rm -rf /var/lib/apt/lists/*
 
 ENV DEBIAN_FRONTEND=
@@ -215,37 +233,113 @@ RUN cat <<EOF > /usr/share/glvnd/egl_vendor.d/10_nvidia.json
 EOF
 
 COPY start-turbovnc.sh /opt/nvidia/entrypoint.d/90-turbovnc.sh
-COPY lcas.jpg /usr/share/backgrounds/xfce/xfce-teal.jpg
-COPY lcas.png /usr/share/backgrounds/xfce/xfce-verticals.png
-COPY lcas.jpg /usr/share/backgrounds/xfce/
-COPY lcas.png /usr/share/backgrounds/xfce/
-RUN echo "source /opt/ros/${ROS_DISTRO}/setup.bash" > /opt/nvidia/entrypoint.d/91-ros.sh
+COPY start-turbovnc.sh /opt/entrypoint.d/90-turbovnc.sh 
+RUN chmod +x /opt/nvidia/entrypoint.d/90-turbovnc.sh /opt/entrypoint.d/90-turbovnc.sh
+
+RUN echo "source /opt/ros/${ROS_DISTRO}/setup.bash" > /opt/nvidia/entrypoint.d/89-ros.sh
+RUN echo "source /opt/ros/${ROS_DISTRO}/setup.bash" > /opt/entrypoint.d/89-ros.sh
 
 COPY entrypoint.sh /opt/entrypoint.sh
 RUN chmod +x /opt/entrypoint.sh
-COPY start-turbovnc.sh /opt/entrypoint.d/90-turbovnc.sh
-RUN echo "source /opt/ros/${ROS_DISTRO}/setup.bash" > /opt/entrypoint.d/91-ros.sh
+
+COPY lcas.jpg /usr/share/backgrounds/xfce/
+COPY lcas.png /usr/share/backgrounds/xfce/
 
 ENTRYPOINT ["/opt/entrypoint.sh"]
 EXPOSE 5801
 
 ###########################################
+# Install VSCode
+
+RUN if [ "$(dpkg --print-architecture)" = "arm64" ]; then \
+        curl -k -L -o /tmp/vscode.deb 'https://code.visualstudio.com/sha/download?build=stable&os=linux-deb-arm64' ; \
+    else \
+        curl -k -L -o /tmp/vscode.deb 'https://code.visualstudio.com/sha/download?build=stable&os=linux-deb-x64' ; \
+    fi && \
+    apt-get update && apt-get install -y /tmp/vscode.deb && \
+    rm /tmp/vscode.deb && rm -rf /var/lib/apt/lists/*
+
+# Install zrok
+RUN curl -sSLfo /tmp/zrok-install.bash https://get.openziti.io/install.bash && \
+    bash /tmp/zrok-install.bash zrok && \
+    rm /tmp/zrok-install.bash
+
+
+RUN mkdir -p /opt/image
+
+COPY .gi? /tmp/gittemp/.git
+RUN git -C /tmp/gittemp log -n 1 --pretty=format:"%H" > /opt/image/version
+
+RUN echo "# Welcome to the L-CAS Desktop Container.\n" > /opt/image/info.md; \
+    echo "This is a Virtual Desktop provided by [L-CAS](https://lcas.lincoln.ac.uk/)." >> /opt/image/info.md; \
+    echo "It provides an installation of ROS2 **'${ROS_DISTRO}'**, running on **Ubuntu '$(lsb_release -s -c)'** on architecture **'$(uname -m)'**.\n" >> /opt/image/info.md; \
+    echo "You can access it via a web browser at port 5801, e.g. http://localhost:5801 (or wherever you have exposed its internal port)." >> /opt/image/info.md; \
+    echo "\n" >> /opt/image/info.md; \
+    echo "*built from https://github.com/LCAS/ros-docker-images\n(commit: [\`$(cat /opt/image/version)\`](https://github.com/LCAS/ros-docker-images/tree/$(cat /opt/image/version)/)),\nprovided to you by [L-CAS](https://lcas.lincoln.ac.uk/).*" >> /opt/image/info.md; \
+    echo "\n" >> /opt/image/info.md; \
+    echo "## Installed Software\n" >> /opt/image/info.md; \
+    echo "The following software is installed:" >> /opt/image/info.md; \
+    echo "* ROS2 \`${ROS_DISTRO}\`, with rudimentary packages installed (base)." >> /opt/image/info.md; \
+    echo "* VSCode (use as \`code\`, sandbox disabled)" >> /opt/image/info.md; \
+    echo "* The L-CAS ROS2 [apt repositories](https://lcas.lincoln.ac.uk/apt/lcas) are enabled." >> /opt/image/info.md; \
+    echo "* The L-CAS [rosdistro](https://github.com/LCAS/rosdistro) is enabled." >> /opt/image/info.md; \
+    echo "* The Zenoh ROS2 bridge \`zenoh-bridge-ros2dds\` (version: ${ZENOH_BRIDGE_VERSION})." >> /opt/image/info.md; \
+    echo "* A Python Venv overlay in \`/home/ros/.local/venv\` (active by default)." >> /opt/image/info.md; \
+    echo "* Node.js (with npm) in version $(node --version)." >> /opt/image/info.md; \
+    echo "* password-less \`sudo\` to install more packages." >> /opt/image/info.md; \
+    echo "\n" >> /opt/image/info.md; \
+    echo "## Default Environment\n" >> /opt/image/info.md; \
+    echo "The following environment variables are set by default:" >> /opt/image/info.md; \
+    echo '```' >> /opt/image/info.md; \
+    env >> /opt/image/info.md; \
+    echo '```' >> /opt/image/info.md; \
+    chmod -w /opt/image/info.md
+COPY README.md /opt/image/README.md
+    
+###########################################
 FROM openglvnc as user
 USER ros
+ENV HOME=/home/ros
 WORKDIR ${HOME}
+RUN mkdir -p ${HOME}/.local/bin 
+
+# install a Python venv overlay to allow pip and friends
+ENV PYTHONUNBUFFERED=1
+RUN python3 -m venv --system-site-packages --upgrade-deps ${HOME}/.local/venv 
+# Enable venv
+ENV PATH="${HOME}/.local/venv/bin:$PATH"
+COPY --chown=ros:ros requirements.txt /tmp/requirements.txt
+RUN pip install --no-cache-dir -r /tmp/requirements.txt && \
+    rm /tmp/requirements.txt
+
+# track commit of the image    
+
+RUN mkdir -p ${HOME}/Desktop/ && \
+    ln -s /opt/image/info.md ${HOME}/Desktop/info.md && \
+    ln -s /opt/image/README.md ${HOME}/Desktop/README.md
+
+# disable sandbox in VSCode
+RUN echo "alias code='code --no-sandbox'" >> ${HOME}/.bashrc
+
+RUN mkdir -p ${HOME}/.vscode && \
+    echo "{" > ${HOME}/.vscode/argv.json && \
+    echo "    \"disable-chromium-sandbox\": true," >> ${HOME}/.vscode/argv.json && \
+    echo "    \"enable-crash-reporter\": false" >> ${HOME}/.vscode/argv.json && \
+    echo "}" >> ${HOME}/.vscode/argv.json
 
 RUN mkdir -p ~/.config/rosdistro && echo "index_url: https://raw.github.com/LCAS/rosdistro/master/index-v4.yaml" > ~/.config/rosdistro/config.yaml
+RUN rosdep update --rosdistro=$ROS_DISTRO
 RUN sudo apt-get purge -y xfce4-screensaver
 
 ENV DISPLAY=:1
 ENV TVNC_VGL=1
 ENV VGL_ISACTIVE=1
-ENV VGL_FPS=30
+ENV VGL_FPS=25
 ENV VGL_COMPRESS=0
 ENV VGL_DISPLAY=egl
 ENV VGL_WM=1
 ENV VGL_PROBEGLX=0
-ENV LD_PRELOAD=libdlfaker.so:libvglfaker.so
+ENV LD_PRELOAD=/usr/lib/libdlfaker.so:/usr/lib/libvglfaker.so
 ENV SHELL=/bin/bash
 
 
