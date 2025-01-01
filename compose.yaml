@@ -1,0 +1,19 @@
+services:
+  lcas_desktop:
+    image: lcas.lincoln.ac.uk/lcas/ros:noble-rolling-12.6.3-opengl-arm64
+    build:
+      context: .
+      dockerfile: nvidia.dockerfile
+      args:
+        BASE_IMAGE: nvidia/cuda:12.6.3-cudnn-devel-ubuntu24.04
+        ROS_DISTRO: rolling
+    runtime: runc
+    ports:
+      - "${VNC_PORT:-5801}:5801"
+    command: bash -c "while true; do sleep 5; done"
+    volumes:
+      - user_home:/home/ros
+
+volumes:
+  user_home:
+    name: ${COMPOSE_PROJECT_NAME}_lcas_desktop_user_${USER}

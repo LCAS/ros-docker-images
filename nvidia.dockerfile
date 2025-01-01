@@ -267,6 +267,23 @@ RUN curl -sSLfo /tmp/zrok-install.bash https://get.openziti.io/install.bash && \
 
 RUN mkdir -p /opt/image
 
+###########################################
+FROM openglvnc as user
+USER ros
+ENV HOME=/home/ros
+WORKDIR ${HOME}
+RUN mkdir -p ${HOME}/.local/bin 
+
+# install a Python venv overlay to allow pip and friends
+ENV PYTHONUNBUFFERED=1
+RUN python3 -m venv --system-site-packages --upgrade-deps ${HOME}/.local/venv 
+# Enable venv
+ENV PATH="${HOME}/.local/venv/bin:$PATH"
+COPY --chown=ros:ros requirements.txt /tmp/requirements.txt
+RUN pip install --no-cache-dir -r /tmp/requirements.txt && \
+    rm /tmp/requirements.txt
+
+USER root
 COPY .gi? /tmp/gittemp/.git
 RUN git -C /tmp/gittemp log -n 1 --pretty=format:"%H" > /opt/image/version
 
@@ -284,9 +301,13 @@ RUN echo "# Welcome to the L-CAS Desktop Container.\n" > /opt/image/info.md; \
     echo "* The L-CAS ROS2 [apt repositories](https://lcas.lincoln.ac.uk/apt/lcas) are enabled." >> /opt/image/info.md; \
     echo "* The L-CAS [rosdistro](https://github.com/LCAS/rosdistro) is enabled." >> /opt/image/info.md; \
     echo "* The Zenoh ROS2 bridge \`zenoh-bridge-ros2dds\` (version: ${ZENOH_BRIDGE_VERSION})." >> /opt/image/info.md; \
-    echo "* A Python Venv overlay in \`/home/ros/.local/venv\` (active by default)." >> /opt/image/info.md; \
+    echo "* A Python Venv overlay in \`/home/ros/.local/venv\` (version: \`$(python --version)\`, active by default)." >> /opt/image/info.md; \
     echo "* Node.js (with npm) in version $(node --version)." >> /opt/image/info.md; \
     echo "* password-less \`sudo\` to install more packages." >> /opt/image/info.md; \
+    echo "\n" >> /opt/image/info.md; \
+    echo "## Tips & Tricks\n" >> /opt/image/info.md; \
+    echo "* run \`code tunnel user login\` to register for remote VSCode tunnel access, then run \`code tunnel\` to start a tunnel" >> /opt/image/info.md; \
+    echo "* use [zrok](https://zrok.io/) to forward local ports" >> /opt/image/info.md; \
     echo "\n" >> /opt/image/info.md; \
     echo "## Default Environment\n" >> /opt/image/info.md; \
     echo "The following environment variables are set by default:" >> /opt/image/info.md; \
@@ -296,23 +317,7 @@ RUN echo "# Welcome to the L-CAS Desktop Container.\n" > /opt/image/info.md; \
     chmod -w /opt/image/info.md
 COPY README.md /opt/image/README.md
     
-###########################################
-FROM openglvnc as user
 USER ros
-ENV HOME=/home/ros
-WORKDIR ${HOME}
-RUN mkdir -p ${HOME}/.local/bin 
-
-# install a Python venv overlay to allow pip and friends
-ENV PYTHONUNBUFFERED=1
-RUN python3 -m venv --system-site-packages --upgrade-deps ${HOME}/.local/venv 
-# Enable venv
-ENV PATH="${HOME}/.local/venv/bin:$PATH"
-COPY --chown=ros:ros requirements.txt /tmp/requirements.txt
-RUN pip install --no-cache-dir -r /tmp/requirements.txt && \
-    rm /tmp/requirements.txt
-
-# track commit of the image    
 
 RUN mkdir -p ${HOME}/Desktop/ && \
     ln -s /opt/image/info.md ${HOME}/Desktop/info.md && \
