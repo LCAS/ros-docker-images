@@ -1,0 +1,3 @@
+services:
+  lcas_desktop:
+    runtime: runc

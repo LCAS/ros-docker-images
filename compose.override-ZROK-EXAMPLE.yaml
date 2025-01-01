@@ -1,0 +1,19 @@
+services:
+  lcas_desktop:
+    runtime: runc
+
+  zrok:
+    image: openziti/zrok
+    restart: unless-stopped
+    user: "1001"
+    volumes:
+      - ${HOME}/.zrok:/.zrok
+    environment:
+      HOME: "/"
+      PFXLOG_NO_JSON: "true"
+      ZROK_RESERVE: ${ZROK_RESERVE:-desktop}
+    # reserve first with zrok reserve public --basic-auth user:pw -n "${ZROK_RESERVE}" http://localhost:5801
+    command: share reserved "${ZROK_RESERVE}" --headless --override-endpoint "http://lcas_desktop:5801"
+    links:
+      - lcas_desktop
+
