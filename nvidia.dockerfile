@@ -249,6 +249,22 @@ ENTRYPOINT ["/opt/entrypoint.sh"]
 EXPOSE 5801
 
 ###########################################
+# Install VSCode
+
+RUN if [ "$(dpkg --print-architecture)" = "arm64" ]; then \
+        curl -L -o /tmp/vscode.deb 'https://code.visualstudio.com/sha/download?build=stable&os=linux-deb-arm64' ; \
+    else \
+        curl -L -o /tmp/vscode.deb 'https://code.visualstudio.com/sha/download?build=stable&os=linux-deb-x64' ; \
+    fi && \
+    apt-get update && apt-get install -y /tmp/vscode.deb && \
+    rm /tmp/vscode.deb && rm -rf /var/lib/apt/lists/*
+
+# Install zrok
+RUN curl -sSLfo /tmp/zrok-install.bash https://get.openziti.io/install.bash && \
+    bash /tmp/zrok-install.bash zrok && \
+    rm /tmp/zrok-install.bash
+
+###########################################
 FROM openglvnc as user
 USER ros
 ENV HOME=/home/ros
@@ -278,7 +294,8 @@ RUN echo "# Welcome to the L-CAS Desktop Container.\n" > ${HOME}/Desktop/info.md
     echo "\n" >> ${HOME}/Desktop/info.md; \
     echo "## Installed Software\n" >> ${HOME}/Desktop/info.md; \
     echo "The following software is installed:" >> ${HOME}/Desktop/info.md; \
-    echo "* ROS2 '${ROS_DISTRO}', with rudimentary packages installed (base)." >> ${HOME}/Desktop/info.md; \
+    echo "* ROS2 \`${ROS_DISTRO}\`, with rudimentary packages installed (base)." >> ${HOME}/Desktop/info.md; \
+    echo "* VSCode version \`$(code --version | tr "\n" " ")\`" >> ${HOME}/Desktop/info.md; \
     echo "* The L-CAS ROS2 [apt repositories](https://lcas.lincoln.ac.uk/apt/lcas) are enabled." >> ${HOME}/Desktop/info.md; \
     echo "* The L-CAS [rosdistro](https://github.com/LCAS/rosdistro) is enabled." >> ${HOME}/Desktop/info.md; \
     echo "* The Zenoh ROS2 bridge \`zenoh-bridge-ros2dds\` (version: ${ZENOH_BRIDGE_VERSION})." >> ${HOME}/Desktop/info.md; \
@@ -294,7 +311,17 @@ RUN echo "# Welcome to the L-CAS Desktop Container.\n" > ${HOME}/Desktop/info.md
     chmod -w ${HOME}/Desktop/info.md
 COPY --chown=ros:ros --chmod=444 README.md ${HOME}/Desktop/README.md
 
+# disable sandbox in VSCode
+RUN echo "alias code='code --no-sandbox'" >> ${HOME}/.bashrc
+
+RUN mkdir -p ${HOME}/.vscode && \
+    echo "{" > ${HOME}/.vscode/argv.json && \
+    echo "    \"disable-chromium-sandbox\": true," >> ${HOME}/.vscode/argv.json && \
+    echo "    \"enable-crash-reporter\": false" >> ${HOME}/.vscode/argv.json && \
+    echo "}" >> ${HOME}/.vscode/argv.json
+
 RUN mkdir -p ~/.config/rosdistro && echo "index_url: https://raw.github.com/LCAS/rosdistro/master/index-v4.yaml" > ~/.config/rosdistro/config.yaml
+RUN rosdep update --rosdistro=$ROS_DISTRO
 RUN sudo apt-get purge -y xfce4-screensaver
 
 ENV DISPLAY=:1
@@ -305,7 +332,7 @@ ENV VGL_COMPRESS=0
 ENV VGL_DISPLAY=egl
 ENV VGL_WM=1
 ENV VGL_PROBEGLX=0
-ENV LD_PRELOAD=libdlfaker.so:libvglfaker.so
+ENV LD_PRELOAD=/usr/lib/libdlfaker.so:/usr/lib/libvglfaker.so
 ENV SHELL=/bin/bash
 
 
