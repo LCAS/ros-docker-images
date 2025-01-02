@@ -8,3 +8,4 @@ requests
 uv
 pandas
 numpy
+pipx
