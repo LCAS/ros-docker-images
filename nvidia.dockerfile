@@ -285,6 +285,8 @@ ENV PATH="${HOME}/.local/venv/bin:$PATH"
 COPY --chown=ros:ros requirements.txt /tmp/requirements.txt
 RUN pip install --no-cache-dir -r /tmp/requirements.txt && \
     rm /tmp/requirements.txt
+# needed as quick fix for https://github.com/pypa/setuptools/issues/4483
+RUN pip install -U setuptools[core]
 
 USER root
 COPY .gi? /tmp/gittemp/.git
