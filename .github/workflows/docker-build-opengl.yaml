@@ -95,7 +95,7 @@ jobs:
         push: true
         load: true
         cache-from: type=local,src=/tmp/cache
-        cache-to: type=local,src=/tmp/cache
+        cache-to: type=local,dest=/tmp/cache
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
         build-args: |
@@ -184,7 +184,7 @@ jobs:
         push: true
         load: true
         cache-from: type=local,src=/tmp/cache
-        cache-to: type=local,src=/tmp/cache
+        cache-to: type=local,dest=/tmp/cache
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
         build-args: |
