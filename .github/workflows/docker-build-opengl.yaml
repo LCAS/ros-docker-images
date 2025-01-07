@@ -93,8 +93,6 @@ jobs:
         file: ./nvidia.dockerfile
         platforms: linux/amd64
         push: true
-        cache-from: type=registry,ref=lcas.lincoln.ac.uk/cache/lcas/ros:${{ matrix.push_tag }}
-        cache-to: type=registry,ref=lcas.lincoln.ac.uk/cache/lcas/ros:${{ matrix.push_tag }}
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
         build-args: |
@@ -180,8 +178,6 @@ jobs:
         context: .
         file: ./nvidia.dockerfile
         platforms: linux/arm64
-        cache-from: type=registry,ref=lcas.lincoln.ac.uk/cache/lcas/ros:${{ matrix.push_tag }}
-        cache-to: type=registry,ref=lcas.lincoln.ac.uk/cache/lcas/ros:${{ matrix.push_tag }}
         push: true
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
