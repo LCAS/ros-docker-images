@@ -94,8 +94,8 @@ jobs:
         platforms: linux/amd64
         push: true
         load: true
-        cache-from: type=local,src=/tmp/cache
-        cache-to: type=local,dest=/tmp/cache,mode=max
+        cache-from: type=registry,ref=lcas.lincoln.ac.uk/cache/lcas_ros:${{ matrix.push_tag }}-staging
+        cache-to: type=registry,ref=lcas.lincoln.ac.uk/cache/lcas_ros:${{ matrix.push_tag }}-staging,mode=max
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
         build-args: |
