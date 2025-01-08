@@ -86,6 +86,10 @@ jobs:
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
       
+    - name: "image name from repo name"
+      id: docker_image_name
+      run: echo "docker_image=${{ github.repository }}" | tr '[:upper:]' '[:lower:]' |sed 's/[^0-9,a-z,A-Z,=,_,\/]/-/g' >>${GITHUB_OUTPUT}
+
     - name: Build Docker Image
       uses: docker/build-push-action@v6
       with:
@@ -93,9 +97,8 @@ jobs:
         file: ./nvidia.dockerfile
         platforms: linux/amd64
         push: true
-        load: true
-        cache-from: type=registry,ref=lcas.lincoln.ac.uk/cache/lcas_ros:${{ matrix.push_tag }}-staging
-        cache-to: type=registry,ref=lcas.lincoln.ac.uk/cache/lcas_ros:${{ matrix.push_tag }}-staging,mode=max
+        cache-from: type=registry,ref=cache:5000/${{ steps.docker_image_name.outputs.docker_image }}:${{ matrix.push_tag }}
+        cache-to: type=registry,ref=cache:5000/${{ steps.docker_image_name.outputs.docker_image }}:${{ matrix.push_tag }},mode=max
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
         build-args: |
@@ -175,6 +178,10 @@ jobs:
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
       
+    - name: "image name from repo name"
+      id: docker_image_name
+      run: echo "docker_image=${{ github.repository }}" | tr '[:upper:]' '[:lower:]' |sed 's/[^0-9,a-z,A-Z,=,_,\/]/-/g' >>${GITHUB_OUTPUT}
+
     - name: Build Docker Image
       uses: docker/build-push-action@v6
       with:
@@ -182,9 +189,8 @@ jobs:
         file: ./nvidia.dockerfile
         platforms: linux/arm64
         push: true
-        load: true
-        cache-from: type=local,src=/tmp/cache
-        cache-to: type=local,dest=/tmp/cache,mode=max
+        cache-from: type=registry,ref=cache:5000/${{ steps.docker_image_name.outputs.docker_image }}:${{ matrix.push_tag }}
+        cache-to: type=registry,ref=cache:5000/${{ steps.docker_image_name.outputs.docker_image }}:${{ matrix.push_tag }},mode=max
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
         build-args: |
