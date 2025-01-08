@@ -34,6 +34,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     gnupg2 \
     lsb-release \
     sudo \
+    python3-setuptools \
     software-properties-common \
     wget \
     && rm -rf /var/lib/apt/lists/*
