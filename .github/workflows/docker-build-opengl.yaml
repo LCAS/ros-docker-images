@@ -58,7 +58,7 @@ jobs:
         flavor: |
           latest=false
         labels: |
-          org.opencontainers.image.description=L-CAS ROS2 Docker Image with virtual X11 embedded (flavour: ${{ matrix.push_tag }})
+          org.opencontainers.image.description=L-CAS ROS2 Docker Image with virtual X11 embedded (flavour: ${{ matrix.push_tag }}, multiarch)
           org.opencontainers.image.authors=L-CAS Team
         # list of Docker images to use as base name for tags
         images: |
