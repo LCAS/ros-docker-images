@@ -1,7 +1,7 @@
 ARG BASE_IMAGE=nvidia/cuda:11.8.0-runtime-ubuntu22.04
 
 ###########################################
-FROM ${BASE_IMAGE} as base
+FROM ${BASE_IMAGE} AS base
 ARG ROS_DISTRO=humble
 
 ENV ROS_DISTRO=${ROS_DISTRO}
@@ -15,7 +15,7 @@ RUN apt-get update && \
   && locale-gen en_US.UTF-8 \
   && update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 \
   && rm -rf /var/lib/apt/lists/*
-ENV LANG en_US.UTF-8
+ENV LANG=en_US.UTF-8
 
 # Install timezone
 RUN ln -fs /usr/share/zoneinfo/UTC /etc/localtime \
@@ -63,11 +63,11 @@ RUN apt-get update \
   && rm -rf /var/lib/apt/lists/*
 
 # Env vars for the nvidia-container-runtime.
-ENV NVIDIA_VISIBLE_DEVICES all
+ENV NVIDIA_VISIBLE_DEVICES=all
 # enable all capabilities for the container
 # Explained here: https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/1.10.0/user-guide.html#driver-capabilities
 ENV NVIDIA_DRIVER_CAPABILITIES=all
-ENV QT_X11_NO_MITSHM 1
+ENV QT_X11_NO_MITSHM=1
 
 ENV AMENT_PREFIX_PATH=/opt/ros/${ROS_DISTRO}
 ENV COLCON_PREFIX_PATH=/opt/ros/${ROS_DISTRO}
@@ -139,7 +139,7 @@ ENV LD_LIBRARY_PATH=/opt/ros/${ROS_DISTRO}/lib
 
 
 ###########################################
-FROM dev as lcas
+FROM dev AS lcas
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -186,7 +186,7 @@ RUN apt-get update && apt-get install -y nodejs sudo && \
 
 
 ###########################################
-FROM lcas as openglvnc
+FROM lcas AS openglvnc
 
 ARG ENTRY_POINT=/opt/entrypoint.sh
 ARG TARGETARCH
@@ -272,7 +272,7 @@ RUN curl -sSLfo /tmp/zrok-install.bash https://get.openziti.io/install.bash && \
 RUN mkdir -p /opt/image
 
 ###########################################
-FROM openglvnc as user
+FROM openglvnc AS user
 USER ros
 ENV HOME=/home/ros
 WORKDIR ${HOME}
@@ -280,6 +280,7 @@ RUN mkdir -p ${HOME}/.local/bin
 
 # install a Python venv overlay to allow pip and friends
 ENV PYTHONUNBUFFERED=1
+ENV PIP_NO_CACHE_DIR=off
 RUN python3 -m venv --system-site-packages --upgrade-deps ${HOME}/.local/venv 
 # Enable venv
 ENV PATH="${HOME}/.local/venv/bin:$PATH"
