@@ -253,20 +253,20 @@ ENTRYPOINT ["/opt/entrypoint.sh"]
 EXPOSE 5801
 
 ###########################################
-# Install VSCode
+# Install VSCode (disabled)
 
-RUN if [ "$(dpkg --print-architecture)" = "arm64" ]; then \
-        curl -k -L -o /tmp/vscode.deb 'https://code.visualstudio.com/sha/download?build=stable&os=linux-deb-arm64' ; \
-    else \
-        curl -k -L -o /tmp/vscode.deb 'https://code.visualstudio.com/sha/download?build=stable&os=linux-deb-x64' ; \
-    fi && \
-    apt-get update && apt-get install -y /tmp/vscode.deb && \
-    rm /tmp/vscode.deb && rm -rf /var/lib/apt/lists/*
+# RUN if [ "$(dpkg --print-architecture)" = "arm64" ]; then \
+#         curl -k -L -o /tmp/vscode.deb 'https://code.visualstudio.com/sha/download?build=stable&os=linux-deb-arm64' ; \
+#     else \
+#         curl -k -L -o /tmp/vscode.deb 'https://code.visualstudio.com/sha/download?build=stable&os=linux-deb-x64' ; \
+#     fi && \
+#     apt-get update && apt-get install -y /tmp/vscode.deb && \
+#     rm /tmp/vscode.deb && rm -rf /var/lib/apt/lists/*
 
-# Install zrok
-RUN curl -sSLfo /tmp/zrok-install.bash https://get.openziti.io/install.bash && \
-    bash /tmp/zrok-install.bash zrok && \
-    rm /tmp/zrok-install.bash
+# Install zrok (disabled)
+# RUN curl -sSLfo /tmp/zrok-install.bash https://get.openziti.io/install.bash && \
+#     bash /tmp/zrok-install.bash zrok && \
+#     rm /tmp/zrok-install.bash
 
 
 RUN mkdir -p /opt/image && mkdir -p /opt/venv && chown ros:ros /opt/venv
@@ -284,11 +284,11 @@ ENV PIP_NO_CACHE_DIR=off
 RUN python3 -m venv --system-site-packages --upgrade-deps /opt/venv 
 # Enable venv
 ENV PATH="/opt/venv/bin:$PATH"
-COPY --chown=ros:ros requirements.txt /tmp/requirements.txt
-RUN pip install --no-cache-dir -r /tmp/requirements.txt && \
-    rm /tmp/requirements.txt
 # needed as quick fix for https://github.com/pypa/setuptools/issues/4483
 RUN pip install -U setuptools[core]
+# COPY --chown=ros:ros requirements.txt /tmp/requirements.txt
+# RUN pip install --no-cache-dir -r /tmp/requirements.txt && \
+#     rm /tmp/requirements.txt
 
 USER root
 COPY .gi? /tmp/gittemp/.git
