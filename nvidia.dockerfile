@@ -269,7 +269,7 @@ RUN curl -sSLfo /tmp/zrok-install.bash https://get.openziti.io/install.bash && \
     rm /tmp/zrok-install.bash
 
 
-RUN mkdir -p /opt/image
+RUN mkdir -p /opt/image && mkdir -p /opt/venv && chown ros:ros /opt/venv
 
 ###########################################
 FROM openglvnc AS user
@@ -281,9 +281,9 @@ RUN mkdir -p ${HOME}/.local/bin
 # install a Python venv overlay to allow pip and friends
 ENV PYTHONUNBUFFERED=1
 ENV PIP_NO_CACHE_DIR=off
-RUN python3 -m venv --system-site-packages --upgrade-deps ${HOME}/.local/venv 
+RUN python3 -m venv --system-site-packages --upgrade-deps /opt/venv 
 # Enable venv
-ENV PATH="${HOME}/.local/venv/bin:$PATH"
+ENV PATH="/opt/venv/bin:$PATH"
 COPY --chown=ros:ros requirements.txt /tmp/requirements.txt
 RUN pip install --no-cache-dir -r /tmp/requirements.txt && \
     rm /tmp/requirements.txt
