@@ -1,6 +1,6 @@
 ARG BASE_IMAGE=ros:humble-ros-base-jammy
 
-FROM ${BASE_IMAGE} as installer
+FROM ${BASE_IMAGE}
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -16,5 +16,3 @@ RUN curl -o /etc/ros/rosdep/sources.list.d/20-default.list https://raw.githubuse
     curl -o /etc/ros/rosdep/sources.list.d/50-lcas.list https://raw.githubusercontent.com/LCAS/rosdistro/master/rosdep/sources.list.d/50-lcas.list
 
 ENV ROSDISTRO_INDEX_URL=https://raw.github.com/LCAS/rosdistro/master/index-v4.yaml
-
-RUN mkdir -p ~/.config/rosdistro && echo "index_url: https://raw.github.com/LCAS/rosdistro/master/index-v4.yaml" > ~/.config/rosdistro/config.yaml

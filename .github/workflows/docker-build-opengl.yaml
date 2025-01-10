@@ -20,17 +20,13 @@ jobs:
         fail-fast: false
         matrix:
           include:
-            - base_image: nvidia/cuda:12.2.2-cudnn8-devel-ubuntu22.04
+            - base_image: lcas.lincoln.ac.uk/lcas/docker_cuda_desktop:jammy-cuda12.2-1
               ros_distro: humble
-              push_tag: jammy-humble-cuda12.2-opengl-multi
+              push_tag: jammy-cuda12.2-humble
 
-            - base_image: nvidia/cuda:12.6.2-cudnn-devel-ubuntu22.04
-              ros_distro: humble
-              push_tag: jammy-humble-cuda12.6-opengl-multi
-
-            - base_image: nvidia/cuda:12.6.3-cudnn-devel-ubuntu24.04
+            - base_image: lcas.lincoln.ac.uk/lcas/docker_cuda_desktop:noble-cuda12.6-1
               ros_distro: rolling
-              push_tag: noble-rolling-cuda12.6-opengl-multi
+              push_tag: noble-cuda12.6-rolling
   
     steps:
     - name: Node Js
@@ -52,6 +48,10 @@ jobs:
         # Password or personal access token used to log against the Docker registry
         password: ${{ secrets.LCAS_REGISTRY_TOKEN }}
 
+    - name: "image name from repo name"
+      id: docker_image_name
+      run: echo "docker_image=${{ github.repository }}" | tr '[:upper:]' '[:lower:]' |sed 's/[^0-9,a-z,A-Z,=,_,\/]/-/g' >>${GITHUB_OUTPUT}
+  
     - name: Docker meta
       id: meta
       uses: docker/metadata-action@v5
@@ -63,7 +63,7 @@ jobs:
           org.opencontainers.image.authors=L-CAS Team
         # list of Docker images to use as base name for tags
         images: |
-          lcas.lincoln.ac.uk/lcas/ros
+          ${{ steps.docker_image_name.outputs.docker_image }}
         # generate Docker tags based on the following events/attributes
         tags: |
           type=raw,value=${{ matrix.push_tag }}-staging
@@ -83,9 +83,8 @@ jobs:
         file: ./nvidia.dockerfile
         platforms: linux/amd64,linux/arm64
         push: true
-        load: true
-        cache-from: type=registry,ref=lcas.lincoln.ac.uk/cache/lcas/ros:${{ matrix.push_tag }}
-        cache-to: type=registry,ref=lcas.lincoln.ac.uk/cache/lcas/ros:${{ matrix.push_tag }},mode=max
+        cache-from: type=registry,ref=lcas.lincoln.ac.uk/cache/${{ steps.docker_image_name.outputs.docker_image }}:${{ matrix.push_tag }}
+        cache-to: type=registry,ref=lcas.lincoln.ac.uk/cache/${{ steps.docker_image_name.outputs.docker_image }}:${{ matrix.push_tag }},mode=max
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
         build-args: |

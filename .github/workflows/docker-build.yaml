@@ -48,14 +48,45 @@ jobs:
         # Password or personal access token used to log against the Docker registry
         password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+    - name: "image name from repo name"
+      id: docker_image_name
+      run: echo "docker_image=${{ github.repository }}" | tr '[:upper:]' '[:lower:]' |sed 's/[^0-9,a-z,A-Z,=,_,\/]/-/g' >>${GITHUB_OUTPUT}
+    
+    - name: Docker meta
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        flavor: |
+          latest=false
+        labels: |
+          org.opencontainers.image.description=L-CAS ROS2 Docker Image (flavour: ${{ matrix.tag }}, multiarch)
+          org.opencontainers.image.authors=L-CAS Team
+        # list of Docker images to use as base name for tags
+        images: |
+          ${{ steps.docker_image_name.outputs.docker_image }}
+        # generate Docker tags based on the following events/attributes
+        tags: |
+          type=raw,value=${{ matrix.tag }}-staging
+          type=raw,enable=${{ github.event_name != 'pull_request' }},value=${{ matrix.tag }}
+          type=ref,enable=${{ github.event_name != 'pull_request' }},event=branch,prefix=${{ matrix.tag }}-
+          type=semver,pattern={{version}},prefix=${{ matrix.tag }}-
+          type=semver,pattern={{major}}.{{minor}},prefix=${{ matrix.tag }}-
+          type=semver,pattern={{major}},prefix=${{ matrix.tag }}-
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+        
     - name: Build Docker Image
       uses: docker/build-push-action@v5
       with:
         context: .
         file: ./Dockerfile
-        platforms: linux/amd64
-        push: ${{ github.event_name != 'pull_request' }}
-        tags: lcas.lincoln.ac.uk/lcas/ros:${{ matrix.tag }}
+        platforms: linux/amd64,linux/arm64
+        push: true
+        cache-from: type=registry,ref=lcas.lincoln.ac.uk/cache/${{ steps.docker_image_name.outputs.docker_image }}:${{ matrix.tag }}
+        cache-to: type=registry,ref=lcas.lincoln.ac.uk/cache/${{ steps.docker_image_name.outputs.docker_image }}:${{ matrix.tag }},mode=max
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
         build-args: |
             BASE_IMAGE=ros:${{ matrix.tag }}
             BRANCH=${{ env.BRANCH }}
