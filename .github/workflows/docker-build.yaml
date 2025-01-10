@@ -14,7 +14,7 @@ on:
 
 jobs:
   build:
-    name: Build ROS Base Images (${{ github.event_name }})
+    name: Build ${{ matrix.tag }} base image (${{ github.event_name }} by ${{ github.actor }})
     runs-on: ubuntu-latest
     strategy:
         matrix:
@@ -64,7 +64,7 @@ jobs:
           org.opencontainers.image.authors=L-CAS Team
         # list of Docker images to use as base name for tags
         images: |
-          ${{ steps.docker_image_name.outputs.docker_image }}
+          lcas.lincoln.ac.uk/${{ steps.docker_image_name.outputs.docker_image }}
         # generate Docker tags based on the following events/attributes
         tags: |
           type=raw,value=${{ matrix.tag }}-staging
