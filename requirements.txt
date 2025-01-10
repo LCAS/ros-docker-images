@@ -1,11 +1,2 @@
-flask
-google-api-python-client
-flask-cors
-bs4
-trafilatura
-markdownify
-requests
 uv
-pandas
-numpy
 pipx
