@@ -170,8 +170,8 @@ COPY README.md /opt/image/README.md
 USER ros
 
 RUN mkdir -p ${HOME}/Desktop/ && \
-    ln -s /opt/image/info.md ${HOME}/Desktop/info.md && \
-    ln -s /opt/image/README.md ${HOME}/Desktop/README.md
+    ln -sf /opt/image/info.md ${HOME}/Desktop/info.md && \
+    ln -sf /opt/image/README.md ${HOME}/Desktop/README.md
 
 RUN rosdep update --rosdistro=${ROS_DISTRO}
 
