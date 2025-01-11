@@ -9,7 +9,7 @@ on:
     branches: [ main ]
 
   schedule:
-    - cron:  '30 2 * * 0,2,4,6'
+    - cron:  '30 2 * * 0'
   workflow_dispatch:
 
 jobs:
@@ -21,6 +21,10 @@ jobs:
         fail-fast: false
         matrix:
           include:
+            - base_image: lcas.lincoln.ac.uk/lcas/docker_cuda_desktop:jammy-cuda11.8-1
+              ros_distro: humble
+              push_tag: jammy-cuda11.8-humble
+
             - base_image: lcas.lincoln.ac.uk/lcas/docker_cuda_desktop:jammy-cuda12.2-1
               ros_distro: humble
               push_tag: jammy-cuda12.2-humble
