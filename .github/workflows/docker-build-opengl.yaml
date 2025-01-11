@@ -17,6 +17,7 @@ jobs:
     name: Build ${{ matrix.push_tag }} OpenGL Desktop Images (${{ github.event_name }} by ${{ github.actor }})
     runs-on: 
       - lcas
+      - qemu
     strategy:
         fail-fast: false
         matrix:
