@@ -22,6 +22,10 @@ jobs:
         fail-fast: false
         matrix:
           include:
+            - base_image: lcas.lincoln.ac.uk/lcas/docker_cuda_desktop:westonrobot-1
+              ros_distro: humble
+              push_tag: westonrobot-humble
+
             - base_image: lcas.lincoln.ac.uk/lcas/docker_cuda_desktop:jammy-cuda11.8-1
               ros_distro: humble
               push_tag: jammy-cuda11.8-humble
