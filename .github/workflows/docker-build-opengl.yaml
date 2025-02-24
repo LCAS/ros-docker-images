@@ -8,12 +8,14 @@ on:
   pull_request:
     branches: [ main ]
 
-  schedule:
-    - cron:  '30 2 * * 0'
   workflow_dispatch:
 
 jobs:
+
   build:
+    env:
+      BASE_VERSION: 1.1.0
+
     name: Build ${{ matrix.push_tag }} OpenGL Desktop Images (${{ github.event_name }} by ${{ github.actor }})
     runs-on: 
       - lcas
@@ -22,19 +24,19 @@ jobs:
         fail-fast: false
         matrix:
           include:
-            - base_image: lcas.lincoln.ac.uk/lcas/docker_cuda_desktop:westonrobot-1
+            - base_image: lcas.lincoln.ac.uk/lcas/docker_cuda_desktop:westonrobot-$BASE_VERSION
               ros_distro: humble
               push_tag: westonrobot-humble
 
-            - base_image: lcas.lincoln.ac.uk/lcas/docker_cuda_desktop:jammy-cuda11.8-1
+            - base_image: lcas.lincoln.ac.uk/lcas/docker_cuda_desktop:jammy-cuda11.8-$BASE_VERSION
               ros_distro: humble
               push_tag: jammy-cuda11.8-humble
 
-            - base_image: lcas.lincoln.ac.uk/lcas/docker_cuda_desktop:jammy-cuda12.2-1
+            - base_image: lcas.lincoln.ac.uk/lcas/docker_cuda_desktop:jammy-cuda12.2-$BASE_VERSION
               ros_distro: humble
               push_tag: jammy-cuda12.2-humble
 
-            - base_image: lcas.lincoln.ac.uk/lcas/docker_cuda_desktop:noble-cuda12.6-1
+            - base_image: lcas.lincoln.ac.uk/lcas/docker_cuda_desktop:noble-cuda12.6-$BASE_VERSION
               ros_distro: rolling
               push_tag: noble-cuda12.6-rolling
   
