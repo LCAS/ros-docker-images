@@ -10,10 +10,6 @@ on:
 
   workflow_dispatch:
 
-env:
-  BASE_VERSION: 1.1.0
-
-
 jobs:
 
   build:
@@ -26,19 +22,19 @@ jobs:
         fail-fast: false
         matrix:
           include:
-            - base_image: lcas.lincoln.ac.uk/lcas/docker_cuda_desktop:westonrobot-${{ env.BASE_VERSION }}
+            - base_image: lcas.lincoln.ac.uk/lcas/docker_cuda_desktop:westonrobot-1.1.0
               ros_distro: humble
               push_tag: westonrobot-humble
 
-            - base_image: lcas.lincoln.ac.uk/lcas/docker_cuda_desktop:jammy-cuda11.8-${{ env.BASE_VERSION }}
+            - base_image: lcas.lincoln.ac.uk/lcas/docker_cuda_desktop:jammy-cuda11.8-1.1.0
               ros_distro: humble
               push_tag: jammy-cuda11.8-humble
 
-            - base_image: lcas.lincoln.ac.uk/lcas/docker_cuda_desktop:jammy-cuda12.2-${{ env.BASE_VERSION }}
+            - base_image: lcas.lincoln.ac.uk/lcas/docker_cuda_desktop:jammy-cuda12.2-1.1.0
               ros_distro: humble
               push_tag: jammy-cuda12.2-humble
 
-            - base_image: lcas.lincoln.ac.uk/lcas/docker_cuda_desktop:noble-cuda12.6-${{ env.BASE_VERSION }}
+            - base_image: lcas.lincoln.ac.uk/lcas/docker_cuda_desktop:noble-cuda12.6-1.1.0
               ros_distro: rolling
               push_tag: noble-cuda12.6-rolling
   
