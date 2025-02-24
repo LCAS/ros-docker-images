@@ -10,11 +10,13 @@ on:
 
   workflow_dispatch:
 
+env:
+  BASE_VERSION: 1.1.0
+
+
 jobs:
 
   build:
-    env:
-      BASE_VERSION: 1.1.0
 
     name: Build ${{ matrix.push_tag }} OpenGL Desktop Images (${{ github.event_name }} by ${{ github.actor }})
     runs-on: 
