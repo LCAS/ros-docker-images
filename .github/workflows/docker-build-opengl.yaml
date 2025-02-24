@@ -24,19 +24,19 @@ jobs:
         fail-fast: false
         matrix:
           include:
-            - base_image: lcas.lincoln.ac.uk/lcas/docker_cuda_desktop:westonrobot-$BASE_VERSION
+            - base_image: lcas.lincoln.ac.uk/lcas/docker_cuda_desktop:westonrobot-${{ env.BASE_VERSION }}
               ros_distro: humble
               push_tag: westonrobot-humble
 
-            - base_image: lcas.lincoln.ac.uk/lcas/docker_cuda_desktop:jammy-cuda11.8-$BASE_VERSION
+            - base_image: lcas.lincoln.ac.uk/lcas/docker_cuda_desktop:jammy-cuda11.8-${{ env.BASE_VERSION }}
               ros_distro: humble
               push_tag: jammy-cuda11.8-humble
 
-            - base_image: lcas.lincoln.ac.uk/lcas/docker_cuda_desktop:jammy-cuda12.2-$BASE_VERSION
+            - base_image: lcas.lincoln.ac.uk/lcas/docker_cuda_desktop:jammy-cuda12.2-${{ env.BASE_VERSION }}
               ros_distro: humble
               push_tag: jammy-cuda12.2-humble
 
-            - base_image: lcas.lincoln.ac.uk/lcas/docker_cuda_desktop:noble-cuda12.6-$BASE_VERSION
+            - base_image: lcas.lincoln.ac.uk/lcas/docker_cuda_desktop:noble-cuda12.6-${{ env.BASE_VERSION }}
               ros_distro: rolling
               push_tag: noble-cuda12.6-rolling
   
