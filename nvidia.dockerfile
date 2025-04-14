@@ -150,7 +150,6 @@ RUN echo "# Welcome to the L-CAS Desktop Container.\n" > /opt/image/info.md; \
     echo "* ROS2 \`${ROS_DISTRO}\`, with rudimentary packages installed (base)." >> /opt/image/info.md; \
     echo "* The L-CAS ROS2 [apt repositories](https://lcas.lincoln.ac.uk/apt/lcas) are enabled." >> /opt/image/info.md; \
     echo "* The L-CAS [rosdistro](https://github.com/LCAS/rosdistro) is enabled." >> /opt/image/info.md; \
-    echo "* The Zenoh ROS2 bridge \`zenoh-bridge-ros2dds\` (version: ${ZENOH_BRIDGE_VERSION})." >> /opt/image/info.md; \
     echo "* A Python Venv overlay in \`/opt/venv\` (version: \`$(python --version)\`, active by default for the main user)." >> /opt/image/info.md; \
     echo "* Node.js (with npm) in version $(node --version)." >> /opt/image/info.md; \
     echo "* password-less \`sudo\` to install more packages." >> /opt/image/info.md; \
