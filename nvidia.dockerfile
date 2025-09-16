@@ -118,7 +118,7 @@ RUN pip install --no-cache-dir -r /tmp/requirements.txt && \
 
 # provide preconfigured zrok endpoint for lcas
 RUN mkdir -p ${HOME}/.zrok && echo '{"api_endpoint": "https://zrok.zrok.lcas.group", "default_frontend": ""}' > ${HOME}/.zrok/config.json
-RUN mkdir -p ~/.config/rosdistro && echo "index_url: https://raw.github.com/LCAS/rosdistro/master/index-v4.yaml" > ~/.config/rosdistro/config.yaml
+RUN mkdir -p ~/.config/rosdistro && echo "index_url: https://raw.githubusercontent.com/LCAS/rosdistro/refs/heads/master/index-v4.yaml" > ~/.config/rosdistro/config.yaml
 
 # switch to root for further setup ##############################################
 USER root
@@ -172,6 +172,8 @@ USER ros
 RUN mkdir -p ${HOME}/Desktop/ && \
     ln -sf /opt/image/info.md ${HOME}/Desktop/info.md && \
     ln -sf /opt/image/README.md ${HOME}/Desktop/README.md
+
+ENV ROSDISTRO_INDEX_URL=https://raw.githubusercontent.com/LCAS/rosdistro/refs/heads/master/index-v4.yaml
 
 RUN rosdep update --rosdistro=${ROS_DISTRO}
 
