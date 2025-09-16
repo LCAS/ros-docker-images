@@ -15,4 +15,4 @@ RUN rosdep init || true
 RUN curl -o /etc/ros/rosdep/sources.list.d/20-default.list https://raw.githubusercontent.com/LCAS/rosdistro/master/rosdep/sources.list.d/20-default.list && \
     curl -o /etc/ros/rosdep/sources.list.d/50-lcas.list https://raw.githubusercontent.com/LCAS/rosdistro/master/rosdep/sources.list.d/50-lcas.list
 
-ENV ROSDISTRO_INDEX_URL=https://raw.github.com/LCAS/rosdistro/master/index-v4.yaml
+ENV ROSDISTRO_INDEX_URL=https://raw.githubusercontent.com/LCAS/rosdistro/refs/heads/master/index-v4.yaml
