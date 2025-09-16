@@ -19,7 +19,9 @@ jobs:
       - lcas
       - qemu
     strategy:
-        fail-fast: false
+        fail-fast: true
+        # let's be sensible with the number we can run at a time
+        max-parallel: 2
         matrix:
           include:
             - base_image: lcas.lincoln.ac.uk/lcas/docker_cuda_desktop:westonrobot-1.1.3
