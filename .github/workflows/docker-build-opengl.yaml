@@ -43,6 +43,11 @@ jobs:
             - base_image: lcas.lincoln.ac.uk/lcas/docker_cuda_desktop:noble-cuda12.6-1.1.3
               ros_distro: rolling
               push_tag: noble-cuda12.6-rolling
+
+            - base_image: lcas.lincoln.ac.uk/lcas/docker_cuda_desktop:noble-cuda12.6-1.1.3
+              ros_distro: jazzy
+              push_tag: noble-cuda12.6-jazzy
+
   
     steps:
     - name: Node Js
